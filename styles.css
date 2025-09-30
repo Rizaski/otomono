@@ -154,6 +154,16 @@ body {
     color: var(--white);
 }
 
+.logout-btn {
+    color: var(--error) !important;
+    transition: var(--transition);
+}
+
+.logout-btn:hover {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+}
+
 .nav-link i {
     font-size: 0.875rem;
 }
