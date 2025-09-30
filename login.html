@@ -93,12 +93,13 @@
 
         .form-group input {
             width: 100%;
-            padding: var(--space-3) var(--space-4);
+            padding: var(--space-3) 3rem var(--space-3) var(--space-4);
             border: 2px solid var(--gray-200);
             border-radius: var(--radius);
             font-size: 1rem;
             transition: var(--transition);
             background: var(--white);
+            box-sizing: border-box;
         }
 
         .form-group input:focus {
@@ -109,11 +110,13 @@
 
         .form-group i {
             position: absolute;
-            right: var(--space-3);
+            right: 1rem;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-45%);
             color: var(--gray-400);
             font-size: 1rem;
+            pointer-events: none;
+            z-index: 2;
         }
 
         .login-actions {
