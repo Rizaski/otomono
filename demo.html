@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jersey Orders - Compact Design</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: var(--space-16);
+            padding: var(--space-16) 0;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .demo-header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .demo-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            color: var(--white);
+            letter-spacing: -0.025em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header p {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-16);
+        }
+        
+        .feature-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+        
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-card h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .feature-card h3 i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+        
+        .feature-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-card li {
+            padding: var(--space-1) 0;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 0.75rem;
+        }
+        
+        .feature-card li i {
+            color: var(--primary);
+            font-size: 0.625rem;
+        }
+        
+        .demo-actions {
+            text-align: center;
+            margin: var(--space-16) 0;
+            padding: var(--space-8) 0;
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .demo-actions .btn {
+            margin: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            font-size: 0.875rem;
+        }
+        
+        .design-showcase {
+            background: var(--white);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin: var(--space-8) 0;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .design-showcase h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .showcase-item {
+            text-align: center;
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        
+        .showcase-item:hover {
+            background: var(--white);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .showcase-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: var(--space-3);
+        }
+        
+        .showcase-item h4 {
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .showcase-item p {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .gradient-showcase {
+            background: var(--white);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin: var(--space-8) 0;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .gradient-showcase h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .gradient-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .gradient-item {
+            padding: var(--space-4);
+            border-radius: var(--radius);
+            color: var(--white);
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .gradient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .gradient-primary {
+            background: var(--gradient-primary);
+        }
+        
+        .gradient-secondary {
+            background: var(--gradient-secondary);
+        }
+        
+        .gradient-accent {
+            background: var(--gradient-accent);
+        }
+        
+        .gradient-success {
+            background: var(--gradient-success);
+        }
+        
+        .gradient-info {
+            background: var(--gradient-info);
+        }
+        
+        .compact-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-8) 0;
+        }
+        
+        .compact-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .compact-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .compact-card h4 {
+            color: var(--gray-900);
+            margin-bottom: var(--space-3);
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .compact-card h4 i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        
+        .compact-card p {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <div class="demo-header-content">
+                <h1><i class="fas fa-tshirt"></i> Jersey Orders</h1>
+                <p>Compact design with beautiful green-blue gradients</p>
+            </div>
+        </div>
+        
+        <div class="design-showcase">
+            <h3>Compact Design Features</h3>
+            <div class="showcase-grid">
+                <div class="showcase-item">
+                    <i class="fas fa-compress-alt"></i>
+                    <h4>Smaller Boxes</h4>
+                    <p>Reduced padding and spacing for compact layout</p>
+                </div>
+                <div class="showcase-item">
+                    <i class="fas fa-palette"></i>
+                    <h4>Green-Blue Gradients</h4>
+                    <p>Beautiful gradient combinations throughout</p>
+                </div>
+                <div class="showcase-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h4>Mobile Optimized</h4>
+                    <p>Compact design works perfectly on mobile</p>
+                </div>
+                <div class="showcase-item">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Fast Loading</h4>
+                    <p>Optimized for speed and performance</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="gradient-showcase">
+            <h3>Gradient Color Palette</h3>
+            <div class="gradient-items">
+                <div class="gradient-item gradient-primary">Primary Gradient</div>
+                <div class="gradient-item gradient-secondary">Secondary Gradient</div>
+                <div class="gradient-item gradient-accent">Accent Gradient</div>
+                <div class="gradient-item gradient-success">Success Gradient</div>
+                <div class="gradient-item gradient-info">Info Gradient</div>
+            </div>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3><i class="fas fa-chart-line"></i> Compact Dashboard</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Smaller stat cards</li>
+                    <li><i class="fas fa-check"></i> Reduced spacing</li>
+                    <li><i class="fas fa-check"></i> Gradient accents</li>
+                    <li><i class="fas fa-check"></i> Clean typography</li>
+                    <li><i class="fas fa-check"></i> Mobile-friendly</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-cogs"></i> Streamlined Management</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Compact forms</li>
+                    <li><i class="fas fa-check"></i> Smaller buttons</li>
+                    <li><i class="fas fa-check"></i> Reduced padding</li>
+                    <li><i class="fas fa-check"></i> Efficient layout</li>
+                    <li><i class="fas fa-check"></i> Quick actions</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-user"></i> Customer Experience</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Compact forms</li>
+                    <li><i class="fas fa-check"></i> Gradient backgrounds</li>
+                    <li><i class="fas fa-check"></i> Small inputs</li>
+                    <li><i class="fas fa-check"></i> Quick submission</li>
+                    <li><i class="fas fa-check"></i> Mobile optimized</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-palette"></i> Visual Design</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Green-blue gradients</li>
+                    <li><i class="fas fa-check"></i> Compact spacing</li>
+                    <li><i class="fas fa-check"></i> Small components</li>
+                    <li><i class="fas fa-check"></i> Clean aesthetics</li>
+                    <li><i class="fas fa-check"></i> Professional look</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="compact-features">
+            <div class="compact-card">
+                <h4><i class="fas fa-compress"></i> Space Efficient</h4>
+                <p>Reduced padding and margins create a more compact interface that fits more content on screen while maintaining readability and usability.</p>
+            </div>
+            <div class="compact-card">
+                <h4><i class="fas fa-paint-brush"></i> Beautiful Gradients</h4>
+                <p>Green and blue gradient combinations create a modern, professional appearance with visual depth and interest throughout the interface.</p>
+            </div>
+            <div class="compact-card">
+                <h4><i class="fas fa-mobile-alt"></i> Mobile First</h4>
+                <p>Compact design works perfectly on mobile devices with touch-friendly elements and optimized spacing for smaller screens.</p>
+            </div>
+        </div>
+        
+        <div class="demo-actions">
+            <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i> Admin Panel
+            </a>
+            <a href="customer.html?order=DEMO-123&action=details" class="btn">
+                <i class="fas fa-user"></i> Customer View
+            </a>
+        </div>
+    </div>
+</body>
+</html>

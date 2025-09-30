@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jersey Details Collection</title>
+    <link rel="stylesheet" href="customer-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="customer-container">
+        <!-- Header -->
+        <header class="customer-header">
+            <div class="header-content">
+                <h1><i class="fas fa-tshirt"></i> Jersey Details Collection</h1>
+                <p>Please provide the details for your jersey order</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="customer-main">
+            <div id="orderInfo" class="order-info-section">
+                <!-- Order information will be loaded here -->
+            </div>
+
+            <div id="detailsForm" class="details-form-section">
+                <!-- Customer details form will be loaded here -->
+            </div>
+
+            <div id="successMessage" class="success-section" style="display: none;">
+                <div class="success-content">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Details Submitted Successfully!</h2>
+                    <p>Thank you for providing your jersey details. We will review your order and notify you of the approval status soon.</p>
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="window.close()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="customer-footer">
+            <p>&copy; 2024 Jersey Orders Management System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="customer-script.js"></script>
+</body>
+</html>

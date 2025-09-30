@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Jersey Orders</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-list"></i> Orders</h1>
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                    <a href="orders.html" class="nav-link active">
+                        <i class="fas fa-list"></i> Orders
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Orders Section -->
+            <section class="orders-section">
+                <div class="section-header">
+                    <h2>Orders Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="showAddOrderModal()">
+                            <i class="fas fa-plus"></i> Add New Order
+                        </button>
+                    </div>
+                    <div class="filter-controls">
+                        <select id="statusFilter" onchange="filterOrders()">
+                            <option value="all">All Orders</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <input type="text" id="searchOrders" placeholder="Search orders..." onkeyup="searchOrders()">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Order Modal -->
+    <div id="addOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Jersey Order</h2>
+                <span class="close" onclick="closeModal('addOrderModal')">&times;</span>
+            </div>
+            <form id="addOrderForm" onsubmit="addOrder(event)">
+                <div class="form-group">
+                    <label for="customerName">Customer Name *</label>
+                    <input type="text" id="customerName" name="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email *</label>
+                    <input type="email" id="customerEmail" name="customerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Phone *</label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="jerseyQuantity">Quantity *</label>
+                    <input type="number" id="jerseyQuantity" name="jerseyQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="specialInstructions">Special Instructions</label>
+                    <textarea id="specialInstructions" name="specialInstructions" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addOrderModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Order Details</h2>
+                <span class="close" onclick="closeModal('orderDetailsModal')">&times;</span>
+            </div>
+            <div id="orderDetailsContent">
+                <!-- Order details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div id="customerDetailsModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Customer Details Collection</h2>
+                <span class="close" onclick="closeModal('customerDetailsModal')">&times;</span>
+            </div>
+            <div id="customerDetailsContent">
+                <!-- Customer details form will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings Modal -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Send Notification</h2>
+                <span class="close" onclick="closeModal('notificationModal')">&times;</span>
+            </div>
+            <form id="notificationForm" onsubmit="sendNotification(event)">
+                <div class="form-group">
+                    <label>Notification Type</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="notificationType" value="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="notificationType" value="sms">
+                            <span>SMS</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notificationMessage">Message</label>
+                    <textarea id="notificationMessage" name="message" rows="4" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('notificationModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Notification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="orders-script.js"></script>
+</body>
+</html>
