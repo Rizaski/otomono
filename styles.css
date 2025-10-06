@@ -1,3 +1,17 @@
+/* Otomono-style tweaks for Add Order modal */
+#addOrderModal .modal-content .form-group label { font-weight: 600; }
+#addOrderModal .modal-content .form-group select,
+#addOrderModal .modal-content .form-group input,
+#addOrderModal .modal-content .form-group textarea {
+    border: 1px solid var(--gray-300);
+    background: var(--gray-50);
+    color: var(--gray-900);
+}
+#addOrderModal .modal-content .form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
 /* Compact Design with Green-Blue Gradients */
 * {
     margin: 0;

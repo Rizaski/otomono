@@ -61,6 +61,7 @@ async function addOrder(event) {
             customerEmail: formData.get('customerEmail'),
             customerPhone: formData.get('customerPhone'),
             jerseyQuantity: parseInt(formData.get('jerseyQuantity')),
+            materialType: formData.get('materialType'),
             specialInstructions: formData.get('specialInstructions'),
             status: 'pending',
             createdDate: new Date().toISOString(),
@@ -117,6 +118,7 @@ function generateUniqueLink(orderId) {
                 customerEmail: order.customerEmail,
                 customerPhone: order.customerPhone,
                 jerseyQuantity: order.jerseyQuantity,
+                materialType: order.materialType,
                 status: order.status,
                 specialInstructions: order.specialInstructions || '',
                 createdDate: order.createdDate
@@ -181,6 +183,11 @@ function showOrderDetails(orderId) {
                     <strong>Quantity</strong>
                     <span>${order.jerseyQuantity}</span>
                 </div>
+                ${order.materialType ? `
+                <div class="info-item">
+                    <strong>Material</strong>
+                    <span>${order.materialType}</span>
+                </div>` : ''}
                 <div class="info-item">
                     <strong>Status</strong>
                     <span class="status-badge status-${order.status}">${order.status}</span>
