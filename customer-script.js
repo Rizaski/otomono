@@ -318,6 +318,11 @@ function displayOrderInfo() {
 // Display the details collection form
 function displayDetailsForm() {
     if (!currentOrder) return;
+    // If details already submitted, show summary instead of form
+    if (currentOrder.customerDetails && Array.isArray(currentOrder.customerDetails) && currentOrder.customerDetails.length > 0) {
+        renderSubmittedSummary();
+        return;
+    }
     
     const detailsFormSection = document.getElementById('detailsForm');
     detailsFormSection.innerHTML = `
@@ -424,6 +429,82 @@ function displayDetailsForm() {
     setTimeout(() => {
         addCounterEventListeners();
     }, 100);
+}
+
+function renderSubmittedSummary() {
+    const detailsFormSection = document.getElementById('detailsForm');
+    const orderInfoSection = document.getElementById('orderInfo');
+    if (!detailsFormSection || !orderInfoSection) return;
+
+    // Build order info (reuse existing displayOrderInfo if present)
+    displayOrderInfo();
+
+    // Build non-zero summary from existing counters logic
+    const summary = computeSummaryFromDetails(currentOrder.customerDetails);
+    const rows = [];
+    if (summary.types && Object.keys(summary.types).length) {
+        rows.push(renderSummaryCategory('Jersey Types', summary.types));
+    }
+    if (summary.sizeCategories && Object.keys(summary.sizeCategories).length) {
+        rows.push(renderSummaryCategory('Size Categories', summary.sizeCategories));
+    }
+    if (summary.sleeves && Object.keys(summary.sleeves).length) {
+        rows.push(renderSummaryCategory('Sleeve Types', summary.sleeves));
+    }
+
+    detailsFormSection.innerHTML = `
+        <div class="counter-section">
+            <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <path d="M9 9h6v6H9z"/>
+                </svg>
+                Order Summary
+            </h3>
+            <div class="counter-table">
+                ${rows.join('')}
+            </div>
+        </div>
+        <div class="alert alert-info" style="margin-top:16px;">
+            Details already submitted for this order. The form is no longer available.
+        </div>
+    `;
+}
+
+function renderSummaryCategory(title, data) {
+    const items = Object.entries(data)
+        .filter(([_, v]) => v > 0)
+        .map(([k, v]) => `
+            <div class="counter-item">
+                <span class="counter-label">${k}:</span>
+                <span class="counter-value">${v}</span>
+            </div>
+        `).join('');
+    if (!items) return '';
+    return `
+        <div class="counter-row">
+            <div class="counter-category">
+                <h4>${title}</h4>
+                <div class="counter-items">${items}</div>
+            </div>
+        </div>
+    `;
+}
+
+function computeSummaryFromDetails(details) {
+    const result = {
+        types: {},
+        sizeCategories: {},
+        sleeves: {}
+    };
+    if (!Array.isArray(details)) return result;
+    details.forEach(d => {
+        if (d && d.type) result.types[d.type] = (result.types[d.type] || 0) + 1;
+        if (d && d.sizeCategory) result.sizeCategories[d.sizeCategory] = (result.sizeCategories[d.sizeCategory] || 0) + 1;
+        if (d && d.sleeve) result.sleeves[d.sleeve] = (result.sleeves[d.sleeve] || 0) + 1;
+    });
+    // Remove zeros handled by render
+    return result;
 }
 
 // Generate the jersey details form
