@@ -42,22 +42,56 @@ function loadOrderFromUrl() {
     const orderId = urlParams.get('order');
     
     if (!orderId) {
-        showError('No order ID provided in the URL.');
-        return;
+        // Create a demo order for testing purposes
+        currentOrder = {
+            id: 'ORD-001',
+            customerName: 'John Doe',
+            customerEmail: 'john.doe@example.com',
+            customerPhone: '+1-555-0123',
+            jerseyQuantity: 2,
+            status: 'pending',
+            specialInstructions: 'Please ensure high quality materials are used.',
+            createdDate: new Date().toISOString()
+        };
+        
+        // Show demo notice
+        showDemoNotice();
+    } else {
+        // Load orders from localStorage (simulating database)
+        const orders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+        const order = orders.find(o => o.id === orderId);
+        
+        if (!order) {
+            showError('Order not found. Please check your link and try again.');
+            return;
+        }
+        
+        currentOrder = order;
     }
     
-    // Load orders from localStorage (simulating database)
-    const orders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
-    const order = orders.find(o => o.id === orderId);
-    
-    if (!order) {
-        showError('Order not found. Please check your link and try again.');
-        return;
-    }
-    
-    currentOrder = order;
     displayOrderInfo();
     displayDetailsForm();
+}
+
+// Show demo notice
+function showDemoNotice() {
+    const main = document.querySelector('.customer-main');
+    const demoNotice = document.createElement('div');
+    demoNotice.className = 'demo-notice';
+    demoNotice.innerHTML = `
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #92400e;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <strong>Demo Mode</strong>
+            </div>
+            <p style="margin: 0; font-size: 14px;">You are viewing a demo of the Jersey Details Collection form. In a real scenario, this would be accessed via a unique order link.</p>
+        </div>
+    `;
+    main.insertBefore(demoNotice, main.firstChild);
 }
 
 // Display order information
@@ -66,7 +100,14 @@ function displayOrderInfo() {
     
     const orderInfoSection = document.getElementById('orderInfo');
     orderInfoSection.innerHTML = `
-        <h2><i class="fas fa-info-circle"></i> Order Information</h2>
+        <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+            </svg>
+            Order Information
+        </h2>
         <div class="info-grid">
             <div class="info-item">
                 <strong>Order ID</strong>
@@ -108,8 +149,13 @@ function displayDetailsForm() {
     
     const detailsFormSection = document.getElementById('detailsForm');
     detailsFormSection.innerHTML = `
-        <h2><i class="fas fa-tshirt"></i> Jersey Details Collection</h2>
-        <p style="color: #666; margin-bottom: 2rem; font-size: 1.1rem;">
+        <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            Jersey Details Collection
+        </h2>
+        <p>
             Please provide the details for your ${currentOrder.jerseyQuantity} jersey(s). All fields marked with * are required. 
             You'll need to specify the jersey type, name, number, size category, size, sleeve type, and whether shorts are included.
         </p>
@@ -121,7 +167,13 @@ function displayDetailsForm() {
             
             <!-- Counter Table -->
             <div id="counterTable" class="counter-section">
-                <h3><i class="fas fa-calculator"></i> Order Summary</h3>
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <path d="M9 9h6v6H9z"/>
+                    </svg>
+                    Order Summary
+                </h3>
                 <div class="counter-table">
                     <div class="counter-row">
                         <div class="counter-category">
@@ -183,9 +235,14 @@ function displayDetailsForm() {
                 </div>
             </div>
             
-            <div class="form-actions" style="margin-top: 2rem; text-align: center;">
+            <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Submit Details
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                        <polyline points="17,21 17,13 7,13 7,21"/>
+                        <polyline points="7,3 7,8 15,8"/>
+                    </svg>
+                    Submit Details
                 </button>
             </div>
         </form>
@@ -203,7 +260,12 @@ function generateJerseyDetailsForm(quantity) {
     for (let i = 0; i < quantity; i++) {
         html += `
             <div class="jersey-item">
-                <h3><i class="fas fa-tshirt"></i> Jersey ${i + 1}</h3>
+                <h3>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    Jersey ${i + 1}
+                </h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="jersey_${i}_type">Jersey Type *</label>
