@@ -18,6 +18,14 @@ async function initializeOrdersPage() {
         console.error('DataManager not loaded. Please include data-manager.js');
         return;
     }
+    // Initialize Firebase if available
+    try {
+        if (dataManager.initializeFirebase) {
+            await dataManager.initializeFirebase();
+        }
+    } catch (e) {
+        console.warn('Firebase initialization failed, continuing with localStorage.', e);
+    }
     
     // Load orders from DataManager
     loadOrders();
@@ -55,22 +63,31 @@ async function addOrder(event) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const formData = new FormData(event.target);
-        const order = {
-            id: generateOrderId(),
+        const newOrderPayload = {
             customerName: formData.get('customerName'),
             customerEmail: formData.get('customerEmail'),
             customerPhone: formData.get('customerPhone'),
             jerseyQuantity: parseInt(formData.get('jerseyQuantity')),
             materialType: formData.get('materialType'),
             specialInstructions: formData.get('specialInstructions'),
-            status: 'pending',
-            createdDate: new Date().toISOString(),
-            customerDetails: null,
-            uniqueLink: null,
-            notifications: []
         };
-        
-        orders.push(order);
+
+        let createdOrder;
+        if (dataManager && dataManager.addOrder) {
+            createdOrder = await dataManager.addOrder(newOrderPayload);
+        } else {
+            createdOrder = {
+                id: generateOrderId(),
+                ...newOrderPayload,
+                status: 'pending',
+                createdDate: new Date().toISOString(),
+                customerDetails: null,
+                uniqueLink: null,
+                notifications: []
+            };
+        }
+
+        orders.push(createdOrder);
         saveOrders();
         renderOrdersTable();
         closeModal('addOrderModal');
@@ -415,10 +432,16 @@ function generateCustomerLink(orderId) {
     
     const uniqueLink = generateUniqueLink(orderId);
     order.uniqueLink = uniqueLink;
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(orderId, { uniqueLink });
+    }
     // Try to generate a short URL; non-blocking for UX
     generateShortLink(uniqueLink).then(shortUrl => {
         if (shortUrl) {
             order.shortLink = shortUrl;
+            if (dataManager && dataManager.updateOrder) {
+                dataManager.updateOrder(orderId, { shortLink });
+            }
             saveOrders();
             // Re-render details section if open
             showOrderDetails(orderId);
@@ -487,6 +510,9 @@ function approveOrder(orderId) {
     
     order.status = 'approved';
     order.approvedDate = new Date().toISOString();
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(orderId, { status: 'approved', approvedDate: order.approvedDate });
+    }
     
     saveOrders();
     renderOrdersTable();
@@ -502,6 +528,9 @@ function rejectOrder(orderId) {
     
     order.status = 'rejected';
     order.rejectedDate = new Date().toISOString();
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(orderId, { status: 'rejected', rejectedDate: order.rejectedDate });
+    }
     
     saveOrders();
     renderOrdersTable();
@@ -654,6 +683,14 @@ function submitCustomerDetails(event, orderId) {
     
     order.customerDetails = customerDetails;
     order.detailsSubmittedDate = new Date().toISOString();
+    order.status = 'details_submitted';
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(orderId, {
+            customerDetails,
+            detailsSubmittedDate: order.detailsSubmittedDate,
+            status: 'details_submitted'
+        });
+    }
     
     saveOrders();
     closeModal('customerDetailsModal');
@@ -707,6 +744,9 @@ function sendNotification(event) {
         order.notifications = [];
     }
     order.notifications.push(notification);
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(currentOrderId, { notifications: order.notifications });
+    }
     
     saveOrders();
     closeModal('notificationModal');
@@ -745,6 +785,9 @@ function sendAutoNotification(order, type) {
         order.notifications = [];
     }
     order.notifications.push(notification);
+    if (dataManager && dataManager.updateOrder) {
+        dataManager.updateOrder(order.id, { notifications: order.notifications });
+    }
     
     saveOrders();
     showAlert(`Auto-notification sent to ${order.customerEmail}!`, 'info');
