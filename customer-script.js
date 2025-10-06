@@ -72,29 +72,25 @@ function loadOrderFromUrl() {
         showDemoNotice();
     } else {
         console.log('Order ID found, fetching order data:', orderId);
-        // If payload exists, attempt to decode and use it as immediate order data
+        let payloadData = null;
         if (payload) {
             try {
                 const json = decodeURIComponent(escape(atob(payload)));
                 const parsed = JSON.parse(json);
                 if (parsed && parsed.id === orderId) {
-                    console.log('Using embedded payload for order');
-                    currentOrder = parsed;
-                    displayOrderInfo();
-                    displayDetailsForm();
-        return;
+                    payloadData = parsed;
                 }
             } catch (e) {
                 console.warn('Failed to decode payload from URL', e);
             }
         }
-        // Simulate API call to fetch order data
-        fetchOrderData(orderId);
+        // Try to fetch from storage/DB first, fall back to payload if not found
+        fetchOrderData(orderId, payloadData);
     }
 }
 
 // Simulate API call to fetch order data
-async function fetchOrderData(orderId) {
+async function fetchOrderData(orderId, payloadFallback = null) {
     try {
         console.log('Starting to fetch order data for:', orderId);
         
@@ -118,7 +114,23 @@ async function fetchOrderData(orderId) {
             hideLoadingState();
             displayOrderInfo();
             displayDetailsForm();
-        } else {
+        } else if (window.dataManager && window.dataManager.useFirebase && window.dataManager.firebaseManager && typeof window.dataManager.firebaseManager.getOrderById === 'function') {
+            console.log('Trying to fetch order from Firebase');
+            try {
+                const fbOrder = await window.dataManager.firebaseManager.getOrderById(orderId);
+                if (fbOrder) {
+                    currentOrder = fbOrder;
+                    hideLoadingState();
+                    displayOrderInfo();
+                    displayDetailsForm();
+                    return;
+                }
+            } catch (e) {
+                console.warn('Firebase fetch failed', e);
+            }
+            // Fall-through to simulated backend/payload
+        }
+        if (!currentOrder) {
             console.log('Order not found in localStorage, simulating backend API');
             // Simulate fetching from backend API
             const simulatedOrder = await simulateBackendAPI(orderId);
@@ -135,6 +147,12 @@ async function fetchOrderData(orderId) {
                     showDemoNotice('This is a simulated order for testing purposes.');
                 }
                 
+                displayOrderInfo();
+                displayDetailsForm();
+            } else if (payloadFallback) {
+                console.log('Using payload fallback for order');
+                currentOrder = payloadFallback;
+                hideLoadingState();
                 displayOrderInfo();
                 displayDetailsForm();
             } else {
