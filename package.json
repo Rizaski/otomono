@@ -7,8 +7,9 @@
   "scripts": {
     "start": "npx http-server -p 3000 -c-1",
     "dev": "npx http-server -p 3000 -c-1 --cors",
-    "build": "echo 'No build process needed for static files'",
-    "deploy": "firebase deploy"
+    "build": "node build.js",
+    "deploy": "firebase deploy",
+    "vercel-build": "node build.js"
   },
   "keywords": [
     "jersey",
