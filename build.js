@@ -4,14 +4,27 @@
 console.log('🚀 Building Jersey Orders Management for Vercel...');
 
 // Copy static files to public directory if needed
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create public directory if it doesn't exist
 const publicDir = './public';
-if (!fs.existsSync(publicDir)) {
-    fs.mkdirSync(publicDir, { recursive: true });
+console.log(`📁 Creating public directory: ${publicDir}`);
+
+// Remove existing public directory if it exists
+if (fs.existsSync(publicDir)) {
+    console.log('🗑️  Removing existing public directory...');
+    fs.rmSync(publicDir, { recursive: true, force: true });
 }
+
+// Create new public directory
+fs.mkdirSync(publicDir, { recursive: true });
+console.log('✅ Public directory created successfully');
 
 // List of files to copy to public directory
 const filesToCopy = [
@@ -36,6 +49,9 @@ const filesToCopy = [
 
 console.log('📁 Copying static files to public directory...');
 
+let copiedCount = 0;
+let missingCount = 0;
+
 filesToCopy.forEach(file => {
     const sourcePath = `./${file}`;
     const destPath = `${publicDir}/${file}`;
@@ -50,10 +66,25 @@ filesToCopy.forEach(file => {
         // Copy file
         fs.copyFileSync(sourcePath, destPath);
         console.log(`✅ Copied ${file}`);
+        copiedCount++;
     } else {
         console.log(`⚠️  File not found: ${file}`);
+        missingCount++;
     }
 });
 
+console.log(`\n📊 Build Summary:`);
+console.log(`✅ Files copied: ${copiedCount}`);
+console.log(`⚠️  Files missing: ${missingCount}`);
 console.log('✅ Build completed successfully!');
-console.log('📦 Static files are ready for deployment in ./public directory');
+console.log(`📦 Static files are ready for deployment in ${publicDir} directory`);
+
+// Verify public directory exists and has content
+if (fs.existsSync(publicDir)) {
+    const files = fs.readdirSync(publicDir);
+    console.log(`📁 Public directory contains ${files.length} files:`);
+    files.forEach(file => console.log(`   - ${file}`));
+} else {
+    console.error('❌ ERROR: Public directory was not created!');
+    process.exit(1);
+}
