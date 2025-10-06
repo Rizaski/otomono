@@ -21,7 +21,14 @@ async function initializeOrdersPage() {
     // Initialize Firebase if available
     try {
         if (dataManager.initializeFirebase) {
-            await dataManager.initializeFirebase();
+            const ok = await dataManager.initializeFirebase();
+            if (ok && dataManager.useFirebase) {
+                // Clear any localStorage orders to prevent stale data when using Firebase
+                try {
+                    localStorage.removeItem('jerseyOrders');
+                    localStorage.removeItem('jersey_orders');
+                } catch (_) {}
+            }
         }
     } catch (e) {
         console.warn('Firebase initialization failed, continuing with localStorage.', e);
@@ -323,6 +330,12 @@ function showOrderDetails(orderId) {
                     </svg>
                     Send Notification
                 </button>
+                <button class="btn btn-danger" onclick="confirmDeleteOrder('${order.id}')">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-9 0h10"/>
+                    </svg>
+                    Delete Order
+                </button>
                 
                 <button class="btn btn-secondary" onclick="closeModal('orderDetailsModal')">
                     Close
@@ -538,6 +551,45 @@ function rejectOrder(orderId) {
     
     sendAutoNotification(order, 'rejected');
     showAlert('Order rejected successfully!', 'success');
+}
+
+function confirmDeleteOrder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    const ok = confirm(`Delete order ${order.id} for ${order.customerName}? This cannot be undone.`);
+    if (!ok) return;
+    deleteOrder(orderId);
+}
+
+async function deleteOrder(orderId) {
+    try {
+        // Remove from in-memory list first for snappy UI
+        const idx = orders.findIndex(o => o.id === orderId);
+        if (idx !== -1) orders.splice(idx, 1);
+        renderOrdersTable();
+        closeModal('orderDetailsModal');
+
+        if (dataManager && dataManager.deleteOrder) {
+            await dataManager.deleteOrder(orderId);
+        } else {
+            // Fallback: localStorage
+            const saved = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+            const i = saved.findIndex(o => o.id === orderId);
+            if (i !== -1) {
+                saved.splice(i, 1);
+                localStorage.setItem('jerseyOrders', JSON.stringify(saved));
+            }
+            const saved2 = JSON.parse(localStorage.getItem('jersey_orders') || '[]');
+            const j = saved2.findIndex(o => o.id === orderId);
+            if (j !== -1) {
+                saved2.splice(j, 1);
+                localStorage.setItem('jersey_orders', JSON.stringify(saved2));
+            }
+        }
+        showAlert('Order deleted successfully', 'success');
+    } catch (e) {
+        showAlert('Failed to delete order. Please try again.', 'error');
+    }
 }
 
 // Customer Details Collection
