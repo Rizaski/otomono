@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node build.js",
+  "buildCommand": "npm run build",
   "outputDirectory": "public",
   "installCommand": "npm install",
   "framework": null,

@@ -1,6 +1,6 @@
 {
   "name": "jersey-orders-management",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Jersey Orders Management System with Firebase Integration",
   "type": "module",
   "main": "index.js",
