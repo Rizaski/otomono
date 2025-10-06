@@ -4,6 +4,9 @@ let isSubmitting = false;
 
 // Initialize the customer page
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Customer page loaded');
+    console.log('Full URL:', window.location.href);
+    console.log('Search params:', window.location.search);
     initializeCustomerPage();
 });
 
@@ -41,7 +44,13 @@ function loadOrderFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order');
     
+    // Debug logging
+    console.log('Current URL:', window.location.href);
+    console.log('URL Parameters:', window.location.search);
+    console.log('Order ID from URL:', orderId);
+    
     if (!orderId) {
+        console.log('No order ID found, creating demo order');
         // Create a demo order for testing purposes
         currentOrder = {
             id: 'ORD-001',
@@ -57,6 +66,7 @@ function loadOrderFromUrl() {
         // Show demo notice
         showDemoNotice();
     } else {
+        console.log('Order ID found, fetching order data:', orderId);
         // Simulate API call to fetch order data
         fetchOrderData(orderId);
     }
@@ -65,6 +75,8 @@ function loadOrderFromUrl() {
 // Simulate API call to fetch order data
 async function fetchOrderData(orderId) {
     try {
+        console.log('Starting to fetch order data for:', orderId);
+        
         // Show loading state
         showLoadingState();
         
@@ -73,17 +85,22 @@ async function fetchOrderData(orderId) {
         
         // Try localStorage first (for development)
         const localOrders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+        console.log('Local orders found:', localOrders.length);
         let order = localOrders.find(o => o.id === orderId);
         
         if (order) {
+            console.log('Order found in localStorage:', order);
             // Found in localStorage (development mode)
             currentOrder = order;
             hideLoadingState();
             displayOrderInfo();
             displayDetailsForm();
         } else {
+            console.log('Order not found in localStorage, simulating backend API');
             // Simulate fetching from backend API
             const simulatedOrder = await simulateBackendAPI(orderId);
+            console.log('Simulated order created:', simulatedOrder);
+            
             if (simulatedOrder) {
                 currentOrder = simulatedOrder;
                 hideLoadingState();

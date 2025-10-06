@@ -88,8 +88,10 @@ function generateOrderId() {
 }
 
 function generateUniqueLink(orderId) {
-    const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl.replace('orders.html', 'customer.html')}?order=${orderId}&action=details`;
+    // Get the current URL and construct the customer link
+    const currentUrl = window.location.href;
+    const baseUrl = currentUrl.replace(/orders\.html.*$/, '');
+    return `${baseUrl}customer.html?order=${orderId}&action=details`;
 }
 
 function showAddOrderModal() {
