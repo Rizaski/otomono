@@ -211,7 +211,7 @@ function showOrderDetails(orderId) {
                 </div>
                 <div class="info-item">
                     <strong>Created Date</strong>
-                    <span>${formatDate(order.createdDate)}</span>
+                    <span>${formatDate(getOrderDate(order))}</span>
                 </div>
             </div>
             
@@ -865,7 +865,7 @@ function rowHtml(order) {
             <td>${order.customerEmail}</td>
             <td>${order.customerPhone}</td>
             <td><span class="status-badge status-${order.status}">${formatStatus(order.status)}</span></td>
-            <td>${formatDate(order.createdDate)}</td>
+            <td>${formatDate(getOrderDate(order))}</td>
             <td>
                 <div class="action-buttons">
                     <button class="btn btn-xs btn-primary" onclick="showOrderDetails('${order.id}')" title="View Order" aria-label="View Order">
@@ -986,8 +986,8 @@ function sortOrders() {
         
         switch (field) {
             case 'date':
-                aValue = new Date(a.createdDate);
-                bValue = new Date(b.createdDate);
+                aValue = new Date(getOrderDate(a));
+                bValue = new Date(getOrderDate(b));
                 break;
             case 'name':
                 aValue = a.customerName.toLowerCase();
@@ -1023,6 +1023,10 @@ function formatDate(dateInput) {
     const d = date.toLocaleDateString();
     const t = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `${d} ${t}`;
+}
+
+function getOrderDate(order) {
+    return order && (order.createdDate || order.orderDate || null);
 }
 
 function formatStatus(status) {
