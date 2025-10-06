@@ -61,6 +61,25 @@ class FirebaseDataManager {
         }
     }
 
+    async getOrderById(id) {
+        try {
+            const order = await firebaseService.getOrderById(id);
+            if (order) {
+                // sync into local cache
+                const idx = this.orders.findIndex(o => o.id === id);
+                if (idx !== -1) {
+                    this.orders[idx] = order;
+                } else {
+                    this.orders.unshift(order);
+                }
+            }
+            return order;
+        } catch (error) {
+            console.error('Error getting order by id:', error);
+            throw error;
+        }
+    }
+
     async updateOrder(id, updates) {
         try {
             await firebaseService.updateOrder(id, updates);
