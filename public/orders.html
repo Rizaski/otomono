@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Jersey Orders</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="logo.png" alt="Logo" class="logo-image" />
+                      </div>
+                <div class="topbar">
+                    <div class="search">
+                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; color: var(--gray-400);">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" id="searchOrders" placeholder="Search orders..." onkeyup="searchOrders()">
+                    </div>
+                    <button class="icon-btn" title="Notifications" aria-label="Notifications">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9zM13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </button>
+                    <div class="profile-dropdown">
+                        <button class="icon-btn" title="Profile" aria-label="Profile" onclick="toggleProfileDropdown()">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z"/>
+                            </svg>
+                        </button>
+                        <div class="profile-dropdown-content" id="profileDropdown">
+                            <a href="#" class="profile-dropdown-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#" class="profile-dropdown-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Settings
+                            </a>
+                            <a href="javascript:void(0)" class="profile-dropdown-item logout" onclick="logout()">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <aside class="sidebar">
+                <div class="logo-container">
+                 </div>
+                <nav class="menu">
+                    <a href="reports.html" class="menu-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="orders.html" class="menu-item active">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        <span>Orders</span>
+                    </a>
+                    <a href="customers.html" class="menu-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        <span>Customers</span>
+                    </a>
+                    <a href="settings.html" class="menu-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+                <div class="menu-bottom">
+                    <a href="javascript:void(0)" class="menu-item logout-item" onclick="logout()">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+                    </a>
+                </div>
+                <div class="menu-bottom"></div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="admin-main">
+            <!-- Orders Section -->
+            <section class="orders-section">
+                <!-- Filter Controls Section -->
+                <div class="filter-section">
+                    <div class="filter-container">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>FILTER BY</label>
+                                <select id="statusFilter" onchange="applyFilters()">
+                                    <option value="all">All Orders</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="details_submitted">Details Submitted</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>CUSTOMER</label>
+                                <select id="customerFilter" onchange="applyFilters()">
+                                    <option value="all">All</option>
+                                    <option value="with_details">With Details</option>
+                                    <option value="without_details">Without Details</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>DATE</label>
+                                <select id="dateFilter" onchange="applyFilters()">
+                                    <option value="all">All time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">Last 7 Days</option>
+                                    <option value="month">Last 30 Days</option>
+                                    <option value="year">Last Year</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>SORT BY</label>
+                                <select id="sortFilter" onchange="sortOrders()">
+                                    <option value="date_desc">Date: Newest</option>
+                                    <option value="name_asc">Name: A-Z</option>
+                                    <option value="status_asc">Status</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>GROUP BY</label>
+                                <select id="groupFilter" onchange="applyFilters()">
+                                    <option value="none">No grouping</option>
+                                    <option value="status">Status</option>
+                                    <option value="date">Date</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>SEARCH</label>
+                                <input type="text" id="searchInput" placeholder="Search orders..." onkeyup="applyFilters()">
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-apply" onclick="applyFilters()">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                </svg>
+                                Apply
+                            </button>
+                            <button class="btn btn-clear" onclick="clearFilters()">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Management Section -->
+                <div class="orders-management-section">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <button class="btn btn-add" onclick="showAddOrderModal()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <h2>ORDERS MANAGEMENT</h2>
+                        </div>
+                    </div>
+
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Order Modal -->
+    <div id="addOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Jersey Order</h2>
+                <span class="close" onclick="closeModal('addOrderModal')">&times;</span>
+            </div>
+            <form id="addOrderForm" onsubmit="addOrder(event)">
+                <div class="form-group">
+                    <label for="customerName">Customer Name *</label>
+                    <input type="text" id="customerName" name="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email *</label>
+                    <input type="email" id="customerEmail" name="customerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Phone *</label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="jerseyQuantity">Quantity *</label>
+                    <input type="number" id="jerseyQuantity" name="jerseyQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="specialInstructions">Special Instructions</label>
+                    <textarea id="specialInstructions" name="specialInstructions" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addOrderModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Order Details</h2>
+                <span class="close" onclick="closeModal('orderDetailsModal')">&times;</span>
+            </div>
+            <div id="orderDetailsContent">
+                <!-- Order details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div id="customerDetailsModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Customer Details Collection</h2>
+                <span class="close" onclick="closeModal('customerDetailsModal')">&times;</span>
+            </div>
+            <div id="customerDetailsContent">
+                <!-- Customer details form will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings Modal -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Send Notification</h2>
+                <span class="close" onclick="closeModal('notificationModal')">&times;</span>
+            </div>
+            <form id="notificationForm" onsubmit="sendNotification(event)">
+                <div class="form-group">
+                    <label>Notification Type</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="notificationType" value="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="notificationType" value="sms">
+                            <span>SMS</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notificationMessage">Message</label>
+                    <textarea id="notificationMessage" name="message" rows="4" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('notificationModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Notification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="data-manager.js"></script>
+    <script src="orders-script.js"></script>
+</body>
+</html>
