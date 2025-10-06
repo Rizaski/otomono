@@ -57,16 +57,29 @@ function loadOrderFromUrl() {
         // Show demo notice
         showDemoNotice();
     } else {
-        // Load orders from localStorage (simulating database)
+        // Try to load orders from localStorage first
         const orders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
-        const order = orders.find(o => o.id === orderId);
+        let order = orders.find(o => o.id === orderId);
         
+        // If order not found in localStorage (deployed scenario), create a demo order with the provided ID
         if (!order) {
-            showError('Order not found. Please check your link and try again.');
-            return;
+            // Create a demo order with the provided ID for deployed scenarios
+            currentOrder = {
+                id: orderId,
+                customerName: 'Demo Customer',
+                customerEmail: 'customer@example.com',
+                customerPhone: '+1-555-0123',
+                jerseyQuantity: 2,
+                status: 'pending',
+                specialInstructions: 'This is a demo order for testing purposes.',
+                createdDate: new Date().toISOString()
+            };
+            
+            // Show demo notice for deployed scenario
+            showDemoNotice('This is a demo order. In a real scenario, this would be a live order from your system.');
+        } else {
+            currentOrder = order;
         }
-        
-        currentOrder = order;
     }
     
     displayOrderInfo();
@@ -74,10 +87,13 @@ function loadOrderFromUrl() {
 }
 
 // Show demo notice
-function showDemoNotice() {
+function showDemoNotice(customMessage = null) {
     const main = document.querySelector('.customer-main');
     const demoNotice = document.createElement('div');
     demoNotice.className = 'demo-notice';
+    
+    const message = customMessage || 'You are viewing a demo of the Jersey Details Collection form. In a real scenario, this would be accessed via a unique order link.';
+    
     demoNotice.innerHTML = `
         <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #92400e;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
@@ -88,7 +104,7 @@ function showDemoNotice() {
                 </svg>
                 <strong>Demo Mode</strong>
             </div>
-            <p style="margin: 0; font-size: 14px;">You are viewing a demo of the Jersey Details Collection form. In a real scenario, this would be accessed via a unique order link.</p>
+            <p style="margin: 0; font-size: 14px;">${message}</p>
         </div>
     `;
     main.insertBefore(demoNotice, main.firstChild);
@@ -469,28 +485,30 @@ function showSuccessMessage() {
 
 // Show error message
 function showError(message) {
-    // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert');
-    existingAlerts.forEach(alert => alert.remove());
-    
-    // Create new alert
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-error';
-    alertDiv.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        ${message}
-    `;
-    
-    // Insert at the top of main content
     const main = document.querySelector('.customer-main');
-    main.insertBefore(alertDiv, main.firstChild);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
-        }
-    }, 5000);
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger';
+    errorDiv.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444; margin-bottom: 16px;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <h2 style="color: #ef4444; margin-bottom: 16px;">Order Not Found</h2>
+            <p style="color: #6b7280; margin-bottom: 24px;">${message}</p>
+            <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 14px; color: #374151;">
+                    <strong>Demo Mode Available:</strong> You can test the form without an order ID by visiting the page directly.
+                </p>
+            </div>
+            <button onclick="location.reload()" style="background: #dc2626; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                Try Again
+            </button>
+        </div>
+    `;
+    main.innerHTML = '';
+    main.appendChild(errorDiv);
 }
 
 // Show success message
