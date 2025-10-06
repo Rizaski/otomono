@@ -90,8 +90,33 @@ function generateOrderId() {
 function generateUniqueLink(orderId) {
     // Get the current URL and construct the customer link
     const currentUrl = window.location.href;
-    const baseUrl = currentUrl.replace(/orders\.html.*$/, '');
-    return `${baseUrl}customer.html?order=${orderId}&action=details`;
+    
+    // Handle different URL patterns
+    let baseUrl;
+    
+    if (currentUrl.includes('orders.html')) {
+        // Replace orders.html with customer.html
+        baseUrl = currentUrl.replace(/orders\.html.*$/, '');
+    } else {
+        // Fallback: use origin and pathname
+        baseUrl = window.location.origin + window.location.pathname.replace(/orders\.html.*$/, '');
+    }
+    
+    // Ensure baseUrl ends with / if it doesn't already
+    if (!baseUrl.endsWith('/') && !baseUrl.endsWith('.html')) {
+        baseUrl += '/';
+    }
+    
+    const customerLink = `${baseUrl}customer.html?order=${orderId}&action=details`;
+    
+    // Debug logging
+    console.log('Generating customer link:');
+    console.log('- Current URL:', currentUrl);
+    console.log('- Base URL:', baseUrl);
+    console.log('- Order ID:', orderId);
+    console.log('- Generated Link:', customerLink);
+    
+    return customerLink;
 }
 
 function showAddOrderModal() {

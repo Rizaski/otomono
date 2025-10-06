@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Customer Link</title>
+</head>
+<body>
+    <h1>Test Customer Link Generation</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Test URL generation
+        function testUrlGeneration() {
+            const results = document.getElementById('test-results');
+            
+            // Test different scenarios
+            const testUrls = [
+                'https://example.com/orders.html',
+                'https://example.com/path/to/orders.html',
+                'http://localhost:3000/orders.html',
+                'file:///C:/Users/USER/Downloads/Jersey/orders.html'
+            ];
+            
+            results.innerHTML = '<h2>URL Generation Tests:</h2>';
+            
+            testUrls.forEach((url, index) => {
+                // Simulate window.location
+                const mockLocation = new URL(url);
+                const baseUrl = url.replace(/orders\.html.*$/, '');
+                const customerLink = `${baseUrl}customer.html?order=TEST-123&action=details`;
+                
+                results.innerHTML += `
+                    <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc;">
+                        <strong>Test ${index + 1}:</strong><br>
+                        <strong>Original URL:</strong> ${url}<br>
+                        <strong>Base URL:</strong> ${baseUrl}<br>
+                        <strong>Customer Link:</strong> <a href="${customerLink}" target="_blank">${customerLink}</a>
+                    </div>
+                `;
+            });
+            
+            // Test actual current URL
+            results.innerHTML += `
+                <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc; background: #f0f0f0;">
+                    <strong>Current Environment:</strong><br>
+                    <strong>Current URL:</strong> ${window.location.href}<br>
+                    <strong>Origin:</strong> ${window.location.origin}<br>
+                    <strong>Pathname:</strong> ${window.location.pathname}<br>
+                    <strong>Generated Link:</strong> <a href="${window.location.href.replace(/orders\.html.*$/, '')}customer.html?order=TEST-123&action=details" target="_blank">${window.location.href.replace(/orders\.html.*$/, '')}customer.html?order=TEST-123&action=details</a>
+                </div>
+            `;
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', testUrlGeneration);
+    </script>
+</body>
+</html>
