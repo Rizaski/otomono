@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function initializeCustomerPage() {
     showPageLoading();
+    // Initialize shared data manager and Firebase if available
+    if (window.dataManager && typeof window.dataManager.initializeFirebase === 'function') {
+        try { await window.dataManager.initializeFirebase(); } catch (e) { /* ignore */ }
+    }
     await new Promise(resolve => setTimeout(resolve, 800)); // Simulate loading
     loadOrderFromUrl();
     hidePageLoading();
@@ -78,7 +82,7 @@ function loadOrderFromUrl() {
                     currentOrder = parsed;
                     displayOrderInfo();
                     displayDetailsForm();
-                    return;
+        return;
                 }
             } catch (e) {
                 console.warn('Failed to decode payload from URL', e);
@@ -499,44 +503,7 @@ function generateJerseyDetailsForm(quantity) {
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="jersey_${i}_color">Jersey Color *</label>
-                        <select id="jersey_${i}_color" name="jersey_${i}_color" required>
-                            <option value="">Select Color</option>
-                            <option value="Red">Red</option>
-                            <option value="Blue">Blue</option>
-                            <option value="Green">Green</option>
-                            <option value="White">White</option>
-                            <option value="Black">Black</option>
-                            <option value="Yellow">Yellow</option>
-                            <option value="Orange">Orange</option>
-                            <option value="Purple">Purple</option>
-                            <option value="Custom">Custom (Specify in Additional Details)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="jersey_${i}_material">Material Preference</label>
-                        <select id="jersey_${i}_material" name="jersey_${i}_material">
-                            <option value="">Select Material</option>
-                            <option value="Polyester">Polyester</option>
-                            <option value="Cotton Blend">Cotton Blend</option>
-                            <option value="Dri-Fit">Dri-Fit</option>
-                            <option value="Mesh">Mesh</option>
-                            <option value="No Preference">No Preference</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="jersey_${i}_printing">Printing Style</label>
-                        <select id="jersey_${i}_printing" name="jersey_${i}_printing">
-                            <option value="">Select Printing</option>
-                            <option value="Screen Print">Screen Print</option>
-                            <option value="Heat Transfer">Heat Transfer</option>
-                            <option value="Embroidery">Embroidery</option>
-                            <option value="No Preference">No Preference</option>
-                        </select>
-                    </div>
-                </div>
+                
                 <div class="form-group">
                     <label for="jersey_${i}_additional">Additional Details & Special Requirements</label>
                     <textarea id="jersey_${i}_additional" name="jersey_${i}_additional" rows="3" 
@@ -569,12 +536,10 @@ function submitCustomerDetails(event) {
         const size = formData.get(`jersey_${i}_size`);
         const sleeve = formData.get(`jersey_${i}_sleeve`);
         const shorts = formData.get(`jersey_${i}_shorts`);
-        const color = formData.get(`jersey_${i}_color`);
-        const material = formData.get(`jersey_${i}_material`);
-        const printing = formData.get(`jersey_${i}_printing`);
+        // Removed: color, material, printing
         const additionalDetails = formData.get(`jersey_${i}_additional`);
         
-        if (!type || !name || !number || !sizeCategory || !size || !sleeve || !shorts || !color) {
+        if (!type || !name || !number || !sizeCategory || !size || !sleeve || !shorts) {
             showError(`Please fill in all required fields for Jersey ${i + 1}.`);
             return;
         }
@@ -587,9 +552,7 @@ function submitCustomerDetails(event) {
             size,
             sleeve,
             shorts,
-            color,
-            material: material || 'No Preference',
-            printing: printing || 'No Preference',
+            // color/material/printing removed per request
             additionalDetails: additionalDetails || ''
         });
     }
@@ -602,27 +565,52 @@ function submitCustomerDetails(event) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     
     // Simulate API call delay
-    setTimeout(() => {
-        // Update the order with customer details
-        const orders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
-        const orderIndex = orders.findIndex(o => o.id === currentOrder.id);
-        
-        if (orderIndex !== -1) {
-            orders[orderIndex].customerDetails = customerDetails;
-            orders[orderIndex].detailsSubmittedDate = new Date().toISOString();
-            orders[orderIndex].status = 'details_submitted';
-            
-            // Save updated orders
-            localStorage.setItem('jerseyOrders', JSON.stringify(orders));
-            
-            // Show success message
-            showSuccessMessage();
-        } else {
+    setTimeout(async () => {
+        try {
+            if (window.dataManager && typeof window.dataManager.updateOrder === 'function') {
+                const updates = {
+                    customerDetails,
+                    detailsSubmittedDate: new Date().toISOString(),
+                    status: 'details_submitted'
+                };
+                await window.dataManager.updateOrder(currentOrder.id, updates);
+                showSuccessMessage();
+                return;
+            }
+
+            // Fallback: localStorage (try both keys)
+            const lsA = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+            const lsB = JSON.parse(localStorage.getItem('jersey_orders') || '[]');
+            let updated = false;
+            const apply = (arr) => {
+                const idx = arr.findIndex(o => o.id === currentOrder.id);
+                if (idx !== -1) {
+                    arr[idx].customerDetails = customerDetails;
+                    arr[idx].detailsSubmittedDate = new Date().toISOString();
+                    arr[idx].status = 'details_submitted';
+                    return true;
+                }
+                return false;
+            };
+            if (apply(lsA)) {
+                localStorage.setItem('jerseyOrders', JSON.stringify(lsA));
+                updated = true;
+            }
+            if (apply(lsB)) {
+                localStorage.setItem('jersey_orders', JSON.stringify(lsB));
+                updated = true;
+            }
+            if (updated) {
+                showSuccessMessage();
+            } else {
+                throw new Error('Not found in storage');
+            }
+        } catch (e) {
             showError('Failed to update order. Please try again.');
             form.classList.remove('form-submitting');
             submitBtn.innerHTML = originalText;
         }
-    }, 2000);
+    }, 1200);
 }
 
 // Show success message
