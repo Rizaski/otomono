@@ -3,9 +3,24 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: var(--font-family) !important;
+}
+
+/* Global font size rules - Match Admin Interface */
+h1, h2, h3, h4, h5, h6 {
+    font-size: var(--font-size-big) !important;
+}
+
+p, span, div, label, input, select, textarea, button {
+    font-size: var(--font-size-small) !important;
 }
 
 :root {
+    /* Layout Rules - Match Admin Interface */
+    --font-size-big: 10pt;
+    --font-size-small: 8pt;
+    --margin-sides: 24px;
+    
     /* Green-Blue Gradient Palette */
     --primary: #10b981;
     --primary-dark: #059669;
@@ -37,7 +52,7 @@
     --gray-900: #0f172a;
     
     /* Typography */
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+    --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
     
     /* Compact Spacing Scale */
@@ -110,7 +125,9 @@ body {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     color: var(--white);
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8);
+    padding-left: var(--margin-sides);
+    padding-right: var(--margin-sides);
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -161,7 +178,9 @@ body {
 /* Main Content */
 .customer-main {
     flex: 1;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8);
+    padding-left: 24px !important;
+    padding-right: 24px !important;
     max-width: 700px;
     margin: 0 auto;
     width: 100%;
@@ -174,6 +193,8 @@ body {
     background: var(--white);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
+    padding-left: 24px !important;
+    padding-right: 24px !important;
     margin-bottom: var(--space-6);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
@@ -246,6 +267,8 @@ body {
     background: var(--white);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
+    padding-left: 24px !important;
+    padding-right: 24px !important;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
     position: relative;
@@ -619,7 +642,7 @@ body {
     border-radius: var(--radius-sm);
     font-size: 0.625rem;
     font-weight: 500;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.05em;
     display: inline-flex;
     align-items: center;
@@ -705,18 +728,24 @@ body {
 /* Responsive Design */
 @media (max-width: 1024px) {
     .customer-main {
-        padding: var(--space-6) var(--space-4);
+        padding: var(--space-6);
+        padding-left: 24px !important;
+        padding-right: 24px !important;
     }
     
     .order-info-section,
     .details-form-section {
         padding: var(--space-4);
+        padding-left: 24px !important;
+        padding-right: 24px !important;
     }
 }
 
 @media (max-width: 768px) {
     .customer-main {
-        padding: var(--space-4) var(--space-3);
+        padding: var(--space-4);
+        padding-left: 24px !important;
+        padding-right: 24px !important;
     }
     
     .header-content h1 {
@@ -736,6 +765,8 @@ body {
     .order-info-section,
     .details-form-section {
         padding: var(--space-3);
+        padding-left: 24px !important;
+        padding-right: 24px !important;
     }
     
     .form-row {
@@ -776,7 +807,9 @@ body {
 
 @media (max-width: 480px) {
     .customer-header {
-        padding: var(--space-6) var(--space-3);
+        padding: var(--space-6);
+        padding-left: var(--margin-sides);
+        padding-right: var(--margin-sides);
     }
     
     .header-content h1 {
@@ -786,6 +819,8 @@ body {
     .order-info-section,
     .details-form-section {
         padding: var(--space-2);
+        padding-left: 24px !important;
+        padding-right: 24px !important;
     }
     
     .info-grid {

@@ -3,45 +3,40 @@ let orders = [];
 let currentOrderId = null;
 let isLoading = false;
 
+// Initialize DataManager
+let dataManager;
+
 // Initialize the orders page
 document.addEventListener('DOMContentLoaded', function() {
     initializeOrdersPage();
 });
 
 async function initializeOrdersPage() {
-    showLoadingState();
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Initialize DataManager
+    dataManager = window.dataManager;
+    if (!dataManager) {
+        console.error('DataManager not loaded. Please include data-manager.js');
+        return;
+    }
+    
+    // Load orders from DataManager
     loadOrders();
     renderOrdersTable();
-    hideLoadingState();
 }
 
 // Loading State Functions
-function showLoadingState() {
-    const main = document.querySelector('.admin-main');
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = 'loadingState';
-    loadingDiv.className = 'loading-overlay';
-    loadingDiv.innerHTML = `
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Loading orders...</p>
-        </div>
-    `;
-    main.appendChild(loadingDiv);
-}
+function showLoadingState() { /* no-op */ }
 
-function hideLoadingState() {
-    const loadingDiv = document.getElementById('loadingState');
-    if (loadingDiv) {
-        loadingDiv.style.opacity = '0';
-        setTimeout(() => loadingDiv.remove(), 300);
-    }
-}
+function hideLoadingState() { /* no-op */ }
 
 function showButtonLoading(button, text = 'Loading...') {
     const originalText = button.innerHTML;
-    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${text}`;
+    button.innerHTML = `
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px; animation: spin 1s linear infinite;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        ${text}
+    `;
     button.disabled = true;
     return () => {
         button.innerHTML = originalText;
@@ -110,7 +105,12 @@ function showOrderDetails(orderId) {
     const modalContent = document.getElementById('orderDetailsContent');
     modalContent.innerHTML = `
         <div class="order-info">
-            <h3><i class="fas fa-info-circle"></i> Order Information</h3>
+            <h3>
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Order Information
+            </h3>
             <div class="info-grid">
                 <div class="info-item">
                     <strong>Order ID</strong>
@@ -151,7 +151,7 @@ function showOrderDetails(orderId) {
             
             ${order.uniqueLink ? `
                 <div class="unique-link">
-                    <h4><i class="fas fa-link"></i> Customer Details Link</h4>
+                    <h4>Customer Details Link</h4>
                     <a href="${order.uniqueLink}" target="_blank">${order.uniqueLink}</a>
                     <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
                         Share this link with the customer to collect jersey details.
@@ -160,27 +160,41 @@ function showOrderDetails(orderId) {
             ` : ''}
             
             ${order.customerDetails ? `
-                <h3 style="margin-top: 2rem;"><i class="fas fa-tshirt"></i> Customer Jersey Details</h3>
+                <h3 style="margin-top: 2rem;">Customer Jersey Details</h3>
                 <div class="customer-details">
                     ${order.customerDetails.map((detail, index) => `
                         <div class="jersey-item">
-                            <h4><i class="fas fa-tshirt"></i> Jersey ${index + 1}</h4>
+                            <h4>Jersey ${index + 1}</h4>
+                            <div class="form-row">
+                                <div class="info-item">
+                                    <strong>Jersey Type</strong>
+                                    <span>${detail.type}</span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Jersey Name</strong>
+                                    <span>${detail.name}</span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Jersey Number</strong>
+                                    <span>${detail.number}</span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Size Category</strong>
+                                    <span>${detail.sizeCategory}</span>
+                                </div>
+                            </div>
                             <div class="form-row">
                                 <div class="info-item">
                                     <strong>Size</strong>
                                     <span>${detail.size}</span>
                                 </div>
                                 <div class="info-item">
-                                    <strong>Color</strong>
-                                    <span>${detail.color}</span>
+                                    <strong>Sleeve</strong>
+                                    <span>${detail.sleeve}</span>
                                 </div>
                                 <div class="info-item">
-                                    <strong>Type</strong>
-                                    <span>${detail.type}</span>
-                                </div>
-                                <div class="info-item">
-                                    <strong>Design</strong>
-                                    <span>${detail.design}</span>
+                                    <strong>Shorts</strong>
+                                    <span>${detail.shorts}</span>
                                 </div>
                             </div>
                             ${detail.additionalDetails ? `
@@ -197,21 +211,33 @@ function showOrderDetails(orderId) {
             <div class="form-actions">
                 ${order.status === 'pending' ? `
                     <button class="btn btn-success" onclick="approveOrder('${order.id}')">
-                        <i class="fas fa-check"></i> Approve Order
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Approve Order
                     </button>
                     <button class="btn btn-danger" onclick="rejectOrder('${order.id}')">
-                        <i class="fas fa-times"></i> Reject Order
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Reject Order
                     </button>
                 ` : ''}
                 
                 ${!order.uniqueLink ? `
                     <button class="btn btn-primary" onclick="generateCustomerLink('${order.id}')">
-                        <i class="fas fa-link"></i> Generate Customer Link
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Generate Customer Link
                     </button>
                 ` : ''}
                 
                 <button class="btn btn-warning" onclick="showNotificationModal('${order.id}')">
-                    <i class="fas fa-envelope"></i> Send Notification
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    Send Notification
                 </button>
                 
                 <button class="btn btn-secondary" onclick="closeModal('orderDetailsModal')">
@@ -222,6 +248,98 @@ function showOrderDetails(orderId) {
     `;
     
     showModal('orderDetailsModal');
+    
+    // Add mobile gesture support
+    addMobileGestures();
+}
+
+// Logout functionality
+function logout() {
+    // Clear any stored authentication data
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('username');
+    localStorage.removeItem('loginTime');
+    
+    // Redirect to login page
+    window.location.href = 'login.html';
+}
+
+// Profile dropdown functionality
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('profileDropdown');
+    const profileButton = event.target.closest('.profile-dropdown button');
+    
+    if (dropdown && !profileButton && !event.target.closest('.profile-dropdown-content')) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Mobile gesture support for modal
+function addMobileGestures() {
+    const modal = document.getElementById('orderDetailsModal');
+    const modalContent = modal.querySelector('.modal-content');
+    
+    if (!modalContent) return;
+    
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    
+    // Touch events for mobile swipe-to-close
+    modalContent.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+    });
+    
+    modalContent.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+        
+        // Only allow downward swipe
+        if (deltaY > 0) {
+            modalContent.style.transform = `translateY(${deltaY}px)`;
+            modalContent.style.opacity = Math.max(0.3, 1 - (deltaY / 200));
+        }
+    });
+    
+    modalContent.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        
+        const deltaY = currentY - startY;
+        
+        // Close modal if swiped down more than 100px
+        if (deltaY > 100) {
+            closeModal('orderDetailsModal');
+        } else {
+            // Reset position
+            modalContent.style.transform = '';
+            modalContent.style.opacity = '';
+        }
+        
+        isDragging = false;
+    });
+    
+    // Prevent modal close when clicking inside content
+    modalContent.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal('orderDetailsModal');
+        }
+    });
 }
 
 function generateCustomerLink(orderId) {
@@ -274,7 +392,12 @@ function showCustomerDetailsForm(orderId) {
     const modalContent = document.getElementById('customerDetailsContent');
     modalContent.innerHTML = `
         <div class="customer-details-form">
-            <h3><i class="fas fa-tshirt"></i> Jersey Details Collection</h3>
+            <h3>
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Jersey Details Collection
+            </h3>
             <p style="color: #666; margin-bottom: 1.5rem;">
                 Please provide details for ${order.jerseyQuantity} jersey(s):
             </p>
@@ -286,7 +409,10 @@ function showCustomerDetailsForm(orderId) {
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Submit Details
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        Submit Details
                     </button>
                 </div>
             </form>
@@ -301,8 +427,41 @@ function generateJerseyDetailsForm(quantity) {
     for (let i = 0; i < quantity; i++) {
         html += `
             <div class="jersey-item">
-                <h4><i class="fas fa-tshirt"></i> Jersey ${i + 1}</h4>
+                <h4>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; margin-right: 6px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Jersey ${i + 1}
+                </h4>
                 <div class="form-row">
+                    <div class="form-group">
+                        <label>Jersey Type *</label>
+                        <select name="jersey_${i}_type" required>
+                            <option value="">Select Jersey Type</option>
+                            <option value="Player Jersey">Player Jersey</option>
+                            <option value="Keeper Jersey">Keeper Jersey</option>
+                            <option value="Official Jersey">Official Jersey</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Jersey Name *</label>
+                        <input type="text" name="jersey_${i}_name" required placeholder="Enter jersey name" />
+                    </div>
+                    <div class="form-group">
+                        <label>Jersey Number *</label>
+                        <input type="number" name="jersey_${i}_number" required placeholder="Enter jersey number" min="1" max="99" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Size Category *</label>
+                        <select name="jersey_${i}_size_category" required>
+                            <option value="">Select Size Category</option>
+                            <option value="Adult">Adult</option>
+                            <option value="Kids">Kids</option>
+                            <option value="Muslima">Muslima</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>Size *</label>
                         <select name="jersey_${i}_size" required>
@@ -312,49 +471,30 @@ function generateJerseyDetailsForm(quantity) {
                             <option value="M">M</option>
                             <option value="L">L</option>
                             <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                            <option value="XXXL">XXXL</option>
+                            <option value="2XL">2XL</option>
+                            <option value="3XL">3XL</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Color *</label>
-                        <select name="jersey_${i}_color" required>
-                            <option value="">Select Color</option>
-                            <option value="Red">Red</option>
-                            <option value="Blue">Blue</option>
-                            <option value="Green">Green</option>
-                            <option value="Yellow">Yellow</option>
-                            <option value="Black">Black</option>
-                            <option value="White">White</option>
-                            <option value="Purple">Purple</option>
-                            <option value="Orange">Orange</option>
+                        <label>Sleeve *</label>
+                        <select name="jersey_${i}_sleeve" required>
+                            <option value="">Select Sleeve</option>
+                            <option value="Short Sleeve">Short Sleeve</option>
+                            <option value="Long Sleeve">Long Sleeve</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Type *</label>
-                        <select name="jersey_${i}_type" required>
-                            <option value="">Select Type</option>
-                            <option value="Home Jersey">Home Jersey</option>
-                            <option value="Away Jersey">Away Jersey</option>
-                            <option value="Training Jersey">Training Jersey</option>
-                            <option value="Goalkeeper Jersey">Goalkeeper Jersey</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Design *</label>
-                        <select name="jersey_${i}_design" required>
-                            <option value="">Select Design</option>
-                            <option value="Plain">Plain</option>
-                            <option value="Stripes">Stripes</option>
-                            <option value="Checks">Checks</option>
-                            <option value="Custom Logo">Custom Logo</option>
-                            <option value="Numbered">Numbered</option>
+                        <label>Shorts *</label>
+                        <select name="jersey_${i}_shorts" required>
+                            <option value="">Select Shorts</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Additional Details</label>
-                    <textarea name="jersey_${i}_additional" rows="2" placeholder="Any special requirements, player name, number, etc."></textarea>
+                    <textarea name="jersey_${i}_additional" rows="2" placeholder="Any special requirements, custom text, etc."></textarea>
                 </div>
             </div>
         `;
@@ -373,10 +513,13 @@ function submitCustomerDetails(event, orderId) {
     
     for (let i = 0; i < order.jerseyQuantity; i++) {
         const detail = {
-            size: formData.get(`jersey_${i}_size`),
-            color: formData.get(`jersey_${i}_color`),
             type: formData.get(`jersey_${i}_type`),
-            design: formData.get(`jersey_${i}_design`),
+            name: formData.get(`jersey_${i}_name`),
+            number: parseInt(formData.get(`jersey_${i}_number`)),
+            sizeCategory: formData.get(`jersey_${i}_size_category`),
+            size: formData.get(`jersey_${i}_size`),
+            sleeve: formData.get(`jersey_${i}_sleeve`),
+            shorts: formData.get(`jersey_${i}_shorts`),
             additionalDetails: formData.get(`jersey_${i}_additional`)
         };
         customerDetails.push(detail);
@@ -514,47 +657,187 @@ function showAlert(message, type = 'info') {
 function renderOrdersTable() {
     const tbody = document.getElementById('ordersTableBody');
     const filteredOrders = getFilteredOrders();
+    const groupBy = (document.getElementById('groupFilter') || { value: 'none' }).value;
     
-    tbody.innerHTML = filteredOrders.map(order => `
+    if (groupBy === 'status') {
+        const groups = filteredOrders.reduce((acc, o) => {
+            const key = formatStatus(o.status);
+            (acc[key] = acc[key] || []).push(o);
+            return acc;
+        }, {});
+        tbody.innerHTML = Object.keys(groups).map(g => `
+            <tr><td colspan="7" style="font-weight:600;color:var(--gray-700);background:var(--gray-50);">${g}</td></tr>
+            ${groups[g].map(order => rowHtml(order)).join('')}
+        `).join('');
+        return;
+    }
+    if (groupBy === 'date') {
+        const groups = filteredOrders.reduce((acc, o) => {
+            const d = new Date(o.createdDate);
+            const key = d.toLocaleDateString();
+            (acc[key] = acc[key] || []).push(o);
+            return acc;
+        }, {});
+        tbody.innerHTML = Object.keys(groups).map(g => `
+            <tr><td colspan="7" style="font-weight:600;color:var(--gray-700);background:var(--gray-50);">${g}</td></tr>
+            ${groups[g].map(order => rowHtml(order)).join('')}
+        `).join('');
+        return;
+    }
+    tbody.innerHTML = filteredOrders.map(order => rowHtml(order)).join('');
+}
+
+function rowHtml(order) {
+    return `
         <tr>
             <td>${order.id}</td>
             <td>${order.customerName}</td>
             <td>${order.customerEmail}</td>
             <td>${order.customerPhone}</td>
-            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+            <td><span class="status-badge status-${order.status}">${formatStatus(order.status)}</span></td>
             <td>${formatDate(order.createdDate)}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn btn-sm btn-primary" onclick="showOrderDetails('${order.id}')">
-                        <i class="fas fa-eye"></i> View
+                    <button class="btn btn-xs btn-primary" onclick="showOrderDetails('${order.id}')" title="View Order" aria-label="View Order">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
                     </button>
-                    ${order.uniqueLink ? `
-                        <button class="btn btn-sm btn-warning" onclick="showCustomerDetailsForm('${order.id}')">
-                            <i class="fas fa-edit"></i> Details
+                    ${order.uniqueLink && !order.customerDetails ? `
+                        <button class="btn btn-xs btn-warning" onclick="showCustomerDetailsForm('${order.id}')" title="Enter Customer Details" aria-label="Enter Customer Details">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </button>
+                    ` : ''}
+                    ${order.status === 'pending' || order.status === 'details_submitted' ? `
+                        <button class="btn btn-xs btn-success" onclick="approveOrder('${order.id}')" title="Approve Order" aria-label="Approve Order">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </button>
+                        <button class="btn btn-xs btn-danger" onclick="rejectOrder('${order.id}')" title="Reject Order" aria-label="Reject Order">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                         </button>
                     ` : ''}
                 </div>
             </td>
         </tr>
-    `).join('');
+    `;
 }
 
 function getFilteredOrders() {
-    const statusFilter = document.getElementById('statusFilter').value;
-    const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+    const statusFilterEl = document.getElementById('statusFilter');
+    const customerFilterEl = document.getElementById('customerFilter');
+    const dateFilterEl = document.getElementById('dateFilter');
+    const searchEl = document.getElementById('searchOrders');
+
+    const statusFilter = statusFilterEl ? statusFilterEl.value : 'all';
+    const customerFilter = customerFilterEl ? customerFilterEl.value : 'all';
+    const dateFilter = dateFilterEl ? dateFilterEl.value : 'all';
+    const searchTerm = searchEl ? (searchEl.value || '').toLowerCase() : '';
     
     return orders.filter(order => {
+        // Status filter
         const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+        
+        // Customer filter
+        let matchesCustomer = true;
+        if (customerFilter === 'with_details') {
+            matchesCustomer = order.customerDetails && order.customerDetails.length > 0;
+        } else if (customerFilter === 'without_details') {
+            matchesCustomer = !order.customerDetails || order.customerDetails.length === 0;
+        }
+        
+        // Date filter
+        let matchesDate = true;
+        if (dateFilter && dateFilter !== 'all') {
+            const orderDate = new Date(order.createdDate);
+            const now = new Date();
+            
+            switch (dateFilter) {
+                case 'today':
+                    matchesDate = orderDate.toDateString() === now.toDateString();
+                    break;
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    matchesDate = orderDate >= weekAgo;
+                    break;
+                case 'month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    matchesDate = orderDate >= monthAgo;
+                    break;
+                case 'year':
+                    const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                    matchesDate = orderDate >= yearAgo;
+                    break;
+            }
+        }
+        
+        // Search filter
         const matchesSearch = !searchTerm || 
             order.id.toLowerCase().includes(searchTerm) ||
             order.customerName.toLowerCase().includes(searchTerm) ||
-            order.customerEmail.toLowerCase().includes(searchTerm);
+            order.customerEmail.toLowerCase().includes(searchTerm) ||
+            order.customerPhone.toLowerCase().includes(searchTerm);
         
-        return matchesStatus && matchesSearch;
+        return matchesStatus && matchesCustomer && matchesDate && matchesSearch;
     });
 }
 
-function filterOrders() {
+// Enhanced Filter Functions
+function applyFilters() {
+    renderOrdersTable();
+    showAlert('Filters applied successfully!', 'success');
+}
+
+function clearFilters() {
+    // Reset all filter controls
+    document.getElementById('statusFilter').value = 'all';
+    document.getElementById('customerFilter').value = 'all';
+    document.getElementById('dateFilter').value = 'all';
+    document.getElementById('sortFilter').value = 'date_desc';
+    document.getElementById('searchOrders').value = '';
+    
+    // Re-render table
+    renderOrdersTable();
+    showAlert('Filters cleared successfully!', 'info');
+}
+
+function sortOrders() {
+    const sortValue = document.getElementById('sortFilter').value;
+    const [field, direction] = sortValue.split('_');
+    
+    orders.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (field) {
+            case 'date':
+                aValue = new Date(a.createdDate);
+                bValue = new Date(b.createdDate);
+                break;
+            case 'name':
+                aValue = a.customerName.toLowerCase();
+                bValue = b.customerName.toLowerCase();
+                break;
+            case 'status':
+                aValue = a.status;
+                bValue = b.status;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (direction === 'asc') {
+            return aValue > bValue ? 1 : -1;
+        } else {
+            return aValue < bValue ? 1 : -1;
+        }
+    });
+    
     renderOrdersTable();
 }
 
@@ -568,15 +851,32 @@ function formatDate(dateString) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 }
 
+function formatStatus(status) {
+    if (!status) return '';
+    const normalized = String(status).toLowerCase().replace(/_/g, ' ');
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 // Data Persistence
 function saveOrders() {
-    localStorage.setItem('jerseyOrders', JSON.stringify(orders));
+    if (dataManager) {
+        // DataManager handles saving automatically
+        return;
+    } else {
+        // Fallback to localStorage
+        localStorage.setItem('jerseyOrders', JSON.stringify(orders));
+    }
 }
 
 function loadOrders() {
-    const savedOrders = localStorage.getItem('jerseyOrders');
-    if (savedOrders) {
-        orders = JSON.parse(savedOrders);
+    if (dataManager) {
+        orders = dataManager.getOrders();
+    } else {
+        // Fallback to localStorage
+        const savedOrders = localStorage.getItem('jerseyOrders');
+        if (savedOrders) {
+            orders = JSON.parse(savedOrders);
+        }
     }
 }
 

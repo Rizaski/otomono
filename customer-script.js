@@ -110,12 +110,77 @@ function displayDetailsForm() {
     detailsFormSection.innerHTML = `
         <h2><i class="fas fa-tshirt"></i> Jersey Details Collection</h2>
         <p style="color: #666; margin-bottom: 2rem; font-size: 1.1rem;">
-            Please provide the details for your ${currentOrder.jerseyQuantity} jersey(s). All fields marked with * are required.
+            Please provide the details for your ${currentOrder.jerseyQuantity} jersey(s). All fields marked with * are required. 
+            You'll need to specify the jersey type, name, number, size category, size, sleeve type, and whether shorts are included.
         </p>
         
         <form id="customerDetailsForm" onsubmit="submitCustomerDetails(event)">
             <div id="jerseyDetailsContainer">
                 ${generateJerseyDetailsForm(currentOrder.jerseyQuantity)}
+            </div>
+            
+            <!-- Counter Table -->
+            <div id="counterTable" class="counter-section">
+                <h3><i class="fas fa-calculator"></i> Order Summary</h3>
+                <div class="counter-table">
+                    <div class="counter-row">
+                        <div class="counter-category">
+                            <h4>Jersey Types</h4>
+                            <div class="counter-items">
+                                <div class="counter-item">
+                                    <span class="counter-label">Player Jersey:</span>
+                                    <span class="counter-value" id="count-player-jersey">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Keeper Jersey:</span>
+                                    <span class="counter-value" id="count-keeper-jersey">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Official Jersey:</span>
+                                    <span class="counter-value" id="count-official-jersey">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Training Jersey:</span>
+                                    <span class="counter-value" id="count-training-jersey">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Warm-up Jersey:</span>
+                                    <span class="counter-value" id="count-warmup-jersey">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="counter-category">
+                            <h4>Size Categories</h4>
+                            <div class="counter-items">
+                                <div class="counter-item">
+                                    <span class="counter-label">Adult:</span>
+                                    <span class="counter-value" id="count-adult">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Kids:</span>
+                                    <span class="counter-value" id="count-kids">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Muslima:</span>
+                                    <span class="counter-value" id="count-muslima">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="counter-category">
+                            <h4>Sleeve Types</h4>
+                            <div class="counter-items">
+                                <div class="counter-item">
+                                    <span class="counter-label">Short Sleeve:</span>
+                                    <span class="counter-value" id="count-short-sleeve">0</span>
+                                </div>
+                                <div class="counter-item">
+                                    <span class="counter-label">Long Sleeve:</span>
+                                    <span class="counter-value" id="count-long-sleeve">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="form-actions" style="margin-top: 2rem; text-align: center;">
@@ -125,6 +190,11 @@ function displayDetailsForm() {
             </div>
         </form>
     `;
+    
+    // Add event listeners for counter updates
+    setTimeout(() => {
+        addCounterEventListeners();
+    }, 100);
 }
 
 // Generate the jersey details form
@@ -136,64 +206,111 @@ function generateJerseyDetailsForm(quantity) {
                 <h3><i class="fas fa-tshirt"></i> Jersey ${i + 1}</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="jersey_${i}_size">Size *</label>
-                        <select id="jersey_${i}_size" name="jersey_${i}_size" required>
-                            <option value="">Select Size</option>
-                            <option value="XS">XS - Extra Small</option>
-                            <option value="S">S - Small</option>
-                            <option value="M">M - Medium</option>
-                            <option value="L">L - Large</option>
-                            <option value="XL">XL - Extra Large</option>
-                            <option value="XXL">XXL - 2X Large</option>
-                            <option value="XXXL">XXXL - 3X Large</option>
+                        <label for="jersey_${i}_type">Jersey Type *</label>
+                        <select id="jersey_${i}_type" name="jersey_${i}_type" required>
+                            <option value="">Select Jersey Type</option>
+                            <option value="Player Jersey">Player Jersey</option>
+                            <option value="Keeper Jersey">Keeper Jersey</option>
+                            <option value="Official Jersey">Official Jersey</option>
+                            <option value="Training Jersey">Training Jersey</option>
+                            <option value="Warm-up Jersey">Warm-up Jersey</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="jersey_${i}_color">Color *</label>
+                        <label for="jersey_${i}_name">Player Name *</label>
+                        <input type="text" id="jersey_${i}_name" name="jersey_${i}_name" required 
+                            placeholder="Enter player name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="jersey_${i}_number">Jersey Number *</label>
+                        <input type="number" id="jersey_${i}_number" name="jersey_${i}_number" required 
+                            placeholder="Enter jersey number" min="1" max="99" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jersey_${i}_size_category">Size Category *</label>
+                        <select id="jersey_${i}_size_category" name="jersey_${i}_size_category" required>
+                            <option value="">Select Size Category</option>
+                            <option value="Adult">Adult</option>
+                            <option value="Kids">Kids</option>
+                            <option value="Muslima">Muslima</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jersey_${i}_size">Size *</label>
+                        <select id="jersey_${i}_size" name="jersey_${i}_size" required>
+                            <option value="">Select Size</option>
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="2XL">2XL</option>
+                            <option value="3XL">3XL</option>
+                            <option value="4XL">4XL</option>
+                            <option value="5XL">5XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jersey_${i}_sleeve">Sleeve *</label>
+                        <select id="jersey_${i}_sleeve" name="jersey_${i}_sleeve" required>
+                            <option value="">Select Sleeve</option>
+                            <option value="Short Sleeve">Short Sleeve</option>
+                            <option value="Long Sleeve">Long Sleeve</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jersey_${i}_shorts">Shorts *</label>
+                        <select id="jersey_${i}_shorts" name="jersey_${i}_shorts" required>
+                            <option value="">Select Shorts</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jersey_${i}_color">Jersey Color *</label>
                         <select id="jersey_${i}_color" name="jersey_${i}_color" required>
                             <option value="">Select Color</option>
                             <option value="Red">Red</option>
                             <option value="Blue">Blue</option>
                             <option value="Green">Green</option>
-                            <option value="Yellow">Yellow</option>
-                            <option value="Black">Black</option>
                             <option value="White">White</option>
-                            <option value="Purple">Purple</option>
+                            <option value="Black">Black</option>
+                            <option value="Yellow">Yellow</option>
                             <option value="Orange">Orange</option>
-                            <option value="Pink">Pink</option>
-                            <option value="Gray">Gray</option>
-                            <option value="Navy">Navy</option>
+                            <option value="Purple">Purple</option>
+                            <option value="Custom">Custom (Specify in Additional Details)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="jersey_${i}_type">Type *</label>
-                        <select id="jersey_${i}_type" name="jersey_${i}_type" required>
-                            <option value="">Select Type</option>
-                            <option value="Home Jersey">Home Jersey</option>
-                            <option value="Away Jersey">Away Jersey</option>
-                            <option value="Training Jersey">Training Jersey</option>
-                            <option value="Goalkeeper Jersey">Goalkeeper Jersey</option>
-                            <option value="Warm-up Jersey">Warm-up Jersey</option>
+                        <label for="jersey_${i}_material">Material Preference</label>
+                        <select id="jersey_${i}_material" name="jersey_${i}_material">
+                            <option value="">Select Material</option>
+                            <option value="Polyester">Polyester</option>
+                            <option value="Cotton Blend">Cotton Blend</option>
+                            <option value="Dri-Fit">Dri-Fit</option>
+                            <option value="Mesh">Mesh</option>
+                            <option value="No Preference">No Preference</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="jersey_${i}_design">Design *</label>
-                        <select id="jersey_${i}_design" name="jersey_${i}_design" required>
-                            <option value="">Select Design</option>
-                            <option value="Plain">Plain</option>
-                            <option value="Stripes">Stripes</option>
-                            <option value="Checks">Checks</option>
-                            <option value="Custom Logo">Custom Logo</option>
-                            <option value="Numbered">Numbered</option>
-                            <option value="V-neck">V-neck</option>
-                            <option value="Collar">Collar</option>
+                        <label for="jersey_${i}_printing">Printing Style</label>
+                        <select id="jersey_${i}_printing" name="jersey_${i}_printing">
+                            <option value="">Select Printing</option>
+                            <option value="Screen Print">Screen Print</option>
+                            <option value="Heat Transfer">Heat Transfer</option>
+                            <option value="Embroidery">Embroidery</option>
+                            <option value="No Preference">No Preference</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="jersey_${i}_additional">Additional Details</label>
+                    <label for="jersey_${i}_additional">Additional Details & Special Requirements</label>
                     <textarea id="jersey_${i}_additional" name="jersey_${i}_additional" rows="3" 
-                        placeholder="Any special requirements, player name, number, custom text, etc."></textarea>
+                        placeholder="Any special requirements, custom text, logo placement, specific measurements, etc."></textarea>
                 </div>
             </div>
         `;
@@ -215,22 +332,34 @@ function submitCustomerDetails(event) {
     
     // Validate and collect details for each jersey
     for (let i = 0; i < currentOrder.jerseyQuantity; i++) {
-        const size = formData.get(`jersey_${i}_size`);
-        const color = formData.get(`jersey_${i}_color`);
         const type = formData.get(`jersey_${i}_type`);
-        const design = formData.get(`jersey_${i}_design`);
+        const name = formData.get(`jersey_${i}_name`);
+        const number = formData.get(`jersey_${i}_number`);
+        const sizeCategory = formData.get(`jersey_${i}_size_category`);
+        const size = formData.get(`jersey_${i}_size`);
+        const sleeve = formData.get(`jersey_${i}_sleeve`);
+        const shorts = formData.get(`jersey_${i}_shorts`);
+        const color = formData.get(`jersey_${i}_color`);
+        const material = formData.get(`jersey_${i}_material`);
+        const printing = formData.get(`jersey_${i}_printing`);
         const additionalDetails = formData.get(`jersey_${i}_additional`);
         
-        if (!size || !color || !type || !design) {
+        if (!type || !name || !number || !sizeCategory || !size || !sleeve || !shorts || !color) {
             showError(`Please fill in all required fields for Jersey ${i + 1}.`);
             return;
         }
         
         customerDetails.push({
-            size,
-            color,
             type,
-            design,
+            name,
+            number: parseInt(number),
+            sizeCategory,
+            size,
+            sleeve,
+            shorts,
+            color,
+            material: material || 'No Preference',
+            printing: printing || 'No Preference',
             additionalDetails: additionalDetails || ''
         });
     }
@@ -340,30 +469,135 @@ style.textContent = `
     .status-badge {
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: none;
         letter-spacing: 0.5px;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
     
     .status-pending {
-        background: #fff3cd;
-        color: #856404;
+        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%) !important;
+        color: #dc2626 !important;
     }
     
     .status-approved {
-        background: #d4edda;
-        color: #155724;
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+        color: #166534 !important;
     }
     
-    .status-rejected {
-        background: #f8d7da;
-        color: #721c24;
+    .status-processing {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+        color: #1e40af !important;
+    }
+    
+    .status-shipped {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+        color: #3730a3 !important;
+    }
+    
+    .status-delivered {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+        color: #166534 !important;
     }
     
     .status-details_submitted {
-        background: #d1ecf1;
-        color: #0c5460;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+        color: #d97706 !important;
+    }
+    
+    .status-rejected {
+        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%) !important;
+        color: #dc2626 !important;
+    }
+    
+    .status-cancelled {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+        color: #374151 !important;
     }
 `;
 document.head.appendChild(style);
+
+// Counter functionality
+function addCounterEventListeners() {
+    if (!currentOrder) return;
+    
+    // Add event listeners to all form fields
+    for (let i = 0; i < currentOrder.jerseyQuantity; i++) {
+        const typeSelect = document.getElementById(`jersey_${i}_type`);
+        const sizeCategorySelect = document.getElementById(`jersey_${i}_size_category`);
+        const sleeveSelect = document.getElementById(`jersey_${i}_sleeve`);
+        
+        if (typeSelect) {
+            typeSelect.addEventListener('change', updateCounters);
+        }
+        if (sizeCategorySelect) {
+            sizeCategorySelect.addEventListener('change', updateCounters);
+        }
+        if (sleeveSelect) {
+            sleeveSelect.addEventListener('change', updateCounters);
+        }
+    }
+}
+
+function updateCounters() {
+    if (!currentOrder) return;
+    
+    // Initialize counters
+    const counters = {
+        'Player Jersey': 0,
+        'Keeper Jersey': 0,
+        'Official Jersey': 0,
+        'Training Jersey': 0,
+        'Warm-up Jersey': 0,
+        'Adult': 0,
+        'Kids': 0,
+        'Muslima': 0,
+        'Short Sleeve': 0,
+        'Long Sleeve': 0
+    };
+    
+    // Count selections for each jersey
+    for (let i = 0; i < currentOrder.jerseyQuantity; i++) {
+        const typeSelect = document.getElementById(`jersey_${i}_type`);
+        const sizeCategorySelect = document.getElementById(`jersey_${i}_size_category`);
+        const sleeveSelect = document.getElementById(`jersey_${i}_sleeve`);
+        
+        if (typeSelect && typeSelect.value) {
+            counters[typeSelect.value] = (counters[typeSelect.value] || 0) + 1;
+        }
+        
+        if (sizeCategorySelect && sizeCategorySelect.value) {
+            counters[sizeCategorySelect.value] = (counters[sizeCategorySelect.value] || 0) + 1;
+        }
+        
+        if (sleeveSelect && sleeveSelect.value) {
+            counters[sleeveSelect.value] = (counters[sleeveSelect.value] || 0) + 1;
+        }
+    }
+    
+    // Update counter display
+    updateCounterDisplay('count-player-jersey', counters['Player Jersey']);
+    updateCounterDisplay('count-keeper-jersey', counters['Keeper Jersey']);
+    updateCounterDisplay('count-official-jersey', counters['Official Jersey']);
+    updateCounterDisplay('count-training-jersey', counters['Training Jersey']);
+    updateCounterDisplay('count-warmup-jersey', counters['Warm-up Jersey']);
+    updateCounterDisplay('count-adult', counters['Adult']);
+    updateCounterDisplay('count-kids', counters['Kids']);
+    updateCounterDisplay('count-muslima', counters['Muslima']);
+    updateCounterDisplay('count-short-sleeve', counters['Short Sleeve']);
+    updateCounterDisplay('count-long-sleeve', counters['Long Sleeve']);
+}
+
+function updateCounterDisplay(elementId, count) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = count;
+        
+        // Add animation class for visual feedback
+        element.classList.add('counter-updated');
+        setTimeout(() => {
+            element.classList.remove('counter-updated');
+        }, 300);
+    }
+}
