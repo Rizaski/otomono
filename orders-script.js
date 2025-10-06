@@ -1016,9 +1016,13 @@ function searchOrders() {
 }
 
 // Utility Functions
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+function formatDate(dateInput) {
+    if (!dateInput) return '-';
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return '-';
+    const d = date.toLocaleDateString();
+    const t = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${d} ${t}`;
 }
 
 function formatStatus(status) {
