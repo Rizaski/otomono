@@ -3,7 +3,8 @@
 // Simple build script for Vercel deployment
 // Version 1.0.1 - Fixed ES modules and public directory creation
 console.log('🚀 Building Jersey Orders Management for Vercel...');
-console.log('📦 Version 1.0.1 - ES Modules Build Script');
+console.log('📦 Version 1.0.2 - ES Modules Build Script');
+console.log('🔧 Vercel Build Process Starting...');
 
 // Copy static files to public directory if needed
 import fs from 'fs';

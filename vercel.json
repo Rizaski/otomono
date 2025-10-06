@@ -1,9 +1,14 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && echo 'Build completed successfully'",
   "outputDirectory": "public",
   "installCommand": "npm install",
   "framework": null,
+  "functions": {
+    "build.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/",
