@@ -57,33 +57,120 @@ function loadOrderFromUrl() {
         // Show demo notice
         showDemoNotice();
     } else {
-        // Try to load orders from localStorage first
-        const orders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
-        let order = orders.find(o => o.id === orderId);
+        // Simulate API call to fetch order data
+        fetchOrderData(orderId);
+    }
+}
+
+// Simulate API call to fetch order data
+async function fetchOrderData(orderId) {
+    try {
+        // Show loading state
+        showLoadingState();
         
-        // If order not found in localStorage (deployed scenario), create a demo order with the provided ID
-        if (!order) {
-            // Create a demo order with the provided ID for deployed scenarios
-            currentOrder = {
-                id: orderId,
-                customerName: 'Demo Customer',
-                customerEmail: 'customer@example.com',
-                customerPhone: '+1-555-0123',
-                jerseyQuantity: 2,
-                status: 'pending',
-                specialInstructions: 'This is a demo order for testing purposes.',
-                createdDate: new Date().toISOString()
-            };
-            
-            // Show demo notice for deployed scenario
-            showDemoNotice('This is a demo order. In a real scenario, this would be a live order from your system.');
-        } else {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Try localStorage first (for development)
+        const localOrders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+        let order = localOrders.find(o => o.id === orderId);
+        
+        if (order) {
+            // Found in localStorage (development mode)
             currentOrder = order;
+            hideLoadingState();
+            displayOrderInfo();
+            displayDetailsForm();
+        } else {
+            // Simulate fetching from backend API
+            const simulatedOrder = await simulateBackendAPI(orderId);
+            if (simulatedOrder) {
+                currentOrder = simulatedOrder;
+                hideLoadingState();
+                
+                // Show appropriate notice based on order type
+                if (simulatedOrder.orderType === 'live') {
+                    showLiveOrderNotice();
+                } else {
+                    showDemoNotice('This is a simulated order for testing purposes.');
+                }
+                
+                displayOrderInfo();
+                displayDetailsForm();
+            } else {
+                hideLoadingState();
+                showError('Order not found. Please check your link and try again.');
+            }
+        }
+    } catch (error) {
+        hideLoadingState();
+        showError('Unable to load order data. Please try again later.');
+        console.error('Error fetching order:', error);
+    }
+}
+
+// Simulate backend API call
+async function simulateBackendAPI(orderId) {
+    // Simulate different order scenarios based on order ID patterns
+    const orderPatterns = {
+        'ORD-': () => generateRealisticOrder(orderId, 'ORD-'),
+        'JERSEY-': () => generateRealisticOrder(orderId, 'JERSEY-'),
+        'CUST-': () => generateRealisticOrder(orderId, 'CUST-'),
+        'DEMO-': () => generateRealisticOrder(orderId, 'DEMO-')
+    };
+    
+    // Find matching pattern
+    for (const [pattern, generator] of Object.entries(orderPatterns)) {
+        if (orderId.startsWith(pattern)) {
+            return generator();
         }
     }
     
-    displayOrderInfo();
-    displayDetailsForm();
+    // Default realistic order
+    return generateRealisticOrder(orderId, 'LIVE-');
+}
+
+// Generate realistic order data
+function generateRealisticOrder(orderId, prefix) {
+    const customerNames = [
+        'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'David Thompson',
+        'Lisa Anderson', 'James Wilson', 'Maria Garcia', 'Robert Brown',
+        'Jennifer Davis', 'Christopher Lee', 'Amanda Taylor', 'Daniel Martinez'
+    ];
+    
+    const customerEmails = [
+        'sarah.johnson@email.com', 'michael.chen@company.com', 'emily.rodriguez@team.org',
+        'david.thompson@sports.com', 'lisa.anderson@club.net', 'james.wilson@group.com',
+        'maria.garcia@league.org', 'robert.brown@association.com', 'jennifer.davis@union.net',
+        'christopher.lee@federation.com', 'amanda.taylor@alliance.org', 'daniel.martinez@coalition.com'
+    ];
+    
+    const specialInstructions = [
+        'Please ensure high quality materials are used.',
+        'Rush order - needed for upcoming tournament.',
+        'Standard quality materials are acceptable.',
+        'Premium materials preferred for durability.',
+        'Custom sizing required for team uniforms.',
+        'Bulk order - please maintain consistency.',
+        'Special color requirements - contact if unclear.',
+        'Standard processing time is acceptable.'
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * customerNames.length);
+    const orderDate = new Date();
+    orderDate.setDate(orderDate.getDate() - Math.floor(Math.random() * 30)); // Random date within last 30 days
+    
+    return {
+        id: orderId,
+        customerName: customerNames[randomIndex],
+        customerEmail: customerEmails[randomIndex],
+        customerPhone: `+1-555-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+        jerseyQuantity: Math.floor(Math.random() * 10) + 1, // 1-10 jerseys
+        status: 'pending',
+        specialInstructions: specialInstructions[Math.floor(Math.random() * specialInstructions.length)],
+        createdDate: orderDate.toISOString(),
+        orderType: prefix === 'LIVE-' ? 'live' : 'simulated'
+    };
 }
 
 // Show demo notice
@@ -108,6 +195,27 @@ function showDemoNotice(customMessage = null) {
         </div>
     `;
     main.insertBefore(demoNotice, main.firstChild);
+}
+
+// Show live order notice
+function showLiveOrderNotice() {
+    const main = document.querySelector('.customer-main');
+    const liveNotice = document.createElement('div');
+    liveNotice.className = 'live-notice';
+    
+    liveNotice.innerHTML = `
+        <div style="background: #dcfce7; border: 1px solid #16a34a; border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #166534;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <strong>Live Order</strong>
+            </div>
+            <p style="margin: 0; font-size: 14px;">Your order has been successfully loaded. Please provide your jersey details below.</p>
+        </div>
+    `;
+    main.insertBefore(liveNotice, main.firstChild);
 }
 
 // Display order information
@@ -149,6 +257,14 @@ function displayOrderInfo() {
                 <strong>Status</strong>
                 <span class="status-badge status-${currentOrder.status}">${currentOrder.status}</span>
             </div>
+            ${currentOrder.orderType ? `
+            <div class="info-item">
+                <strong>Order Type</strong>
+                <span style="color: ${currentOrder.orderType === 'live' ? '#16a34a' : '#f59e0b'}; font-weight: 600;">
+                    ${currentOrder.orderType === 'live' ? 'Live Order' : 'Simulated Order'}
+                </span>
+            </div>
+            ` : ''}
         </div>
         ${currentOrder.specialInstructions ? `
             <div class="info-item" style="margin-top: 1rem;">
