@@ -305,6 +305,8 @@ body {
 @media (max-width: 640px) {
   .search { width: 100%; }
   .topbar { width: 100%; }
+  .mobile-nav { display: flex; }
+  .app-body { padding-bottom: 64px; }
 }
 
 .admin-header h1 {
