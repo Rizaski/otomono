@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Integration Test</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #b91c1c; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Integration Test</h1>
+        <p>Testing Firebase connection and data operations for Jersey Orders Management.</p>
+        
+        <div id="status" class="status info">Initializing...</div>
+        
+        <div class="test-section">
+            <h3>Connection Test</h3>
+            <button onclick="testConnection()">Test Firebase Connection</button>
+            <div id="connectionResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Data Operations Test</h3>
+            <button onclick="testAddOrder()">Add Test Order</button>
+            <button onclick="testGetOrders()">Get Orders</button>
+            <button onclick="testUpdateOrder()">Update Order</button>
+            <button onclick="testDeleteOrder()">Delete Order</button>
+            <div id="dataResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Real-time Updates Test</h3>
+            <button onclick="testRealtimeUpdates()">Start Real-time Listener</button>
+            <button onclick="stopRealtimeUpdates()">Stop Listener</button>
+            <div id="realtimeResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Reports Test</h3>
+            <button onclick="testReports()">Generate Reports</button>
+            <div id="reportsResult"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseDataManager } from './firebase-data-manager.js';
+        
+        let testOrderId = null;
+        let realtimeUnsubscribe = null;
+        
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                const status = document.getElementById('status');
+                status.textContent = 'Connecting to Firebase...';
+                status.className = 'status info';
+                
+                await firebaseDataManager.initialize();
+                
+                status.textContent = '✅ Firebase connected successfully!';
+                status.className = 'status success';
+                
+                console.log('Firebase initialized successfully');
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.textContent = '❌ Firebase connection failed: ' + error.message;
+                status.className = 'status error';
+                console.error('Firebase initialization failed:', error);
+            }
+        }
+        
+        // Test Firebase connection
+        window.testConnection = async function() {
+            const result = document.getElementById('connectionResult');
+            try {
+                result.innerHTML = '<div class="status info">Testing connection...</div>';
+                
+                const orders = await firebaseDataManager.getOrders();
+                result.innerHTML = `<div class="status success">✅ Connection successful! Found ${orders.length} orders.</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Connection failed: ${error.message}</div>`;
+            }
+        };
+        
+        // Test adding an order
+        window.testAddOrder = async function() {
+            const result = document.getElementById('dataResult');
+            try {
+                result.innerHTML = '<div class="status info">Adding test order...</div>';
+                
+                const testOrder = {
+                    customer: 'Test Customer',
+                    email: 'test@example.com',
+                    phone: '+1-555-0123',
+                    jersey: 'Test Jersey',
+                    size: 'M',
+                    quantity: 1,
+                    total: 25.99,
+                    status: 'pending',
+                    specialInstructions: 'This is a test order'
+                };
+                
+                const newOrder = await firebaseDataManager.addOrder(testOrder);
+                testOrderId = newOrder.id;
+                
+                result.innerHTML = `<div class="status success">✅ Order added successfully! ID: ${newOrder.id}</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to add order: ${error.message}</div>`;
+            }
+        };
+        
+        // Test getting orders
+        window.testGetOrders = async function() {
+            const result = document.getElementById('dataResult');
+            try {
+                result.innerHTML = '<div class="status info">Fetching orders...</div>';
+                
+                const orders = await firebaseDataManager.getOrders();
+                
+                result.innerHTML = `
+                    <div class="status success">
+                        ✅ Retrieved ${orders.length} orders successfully!<br>
+                        <small>Orders: ${orders.map(o => o.id).join(', ')}</small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to get orders: ${error.message}</div>`;
+            }
+        };
+        
+        // Test updating an order
+        window.testUpdateOrder = async function() {
+            const result = document.getElementById('dataResult');
+            try {
+                if (!testOrderId) {
+                    result.innerHTML = '<div class="status error">❌ No test order ID available. Add an order first.</div>';
+                    return;
+                }
+                
+                result.innerHTML = '<div class="status info">Updating test order...</div>';
+                
+                const updatedOrder = await firebaseDataManager.updateOrder(testOrderId, {
+                    status: 'approved',
+                    specialInstructions: 'Updated test order'
+                });
+                
+                result.innerHTML = `<div class="status success">✅ Order updated successfully! Status: ${updatedOrder.status}</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to update order: ${error.message}</div>`;
+            }
+        };
+        
+        // Test deleting an order
+        window.testDeleteOrder = async function() {
+            const result = document.getElementById('dataResult');
+            try {
+                if (!testOrderId) {
+                    result.innerHTML = '<div class="status error">❌ No test order ID available. Add an order first.</div>';
+                    return;
+                }
+                
+                result.innerHTML = '<div class="status info">Deleting test order...</div>';
+                
+                await firebaseDataManager.deleteOrder(testOrderId);
+                testOrderId = null;
+                
+                result.innerHTML = '<div class="status success">✅ Order deleted successfully!</div>';
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to delete order: ${error.message}</div>`;
+            }
+        };
+        
+        // Test real-time updates
+        window.testRealtimeUpdates = function() {
+            const result = document.getElementById('realtimeResult');
+            try {
+                result.innerHTML = '<div class="status info">Starting real-time listener...</div>';
+                
+                firebaseDataManager.setupRealtimeUpdates();
+                
+                result.innerHTML = '<div class="status success">✅ Real-time listener started! Changes will appear automatically.</div>';
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to start real-time updates: ${error.message}</div>`;
+            }
+        };
+        
+        // Stop real-time updates
+        window.stopRealtimeUpdates = function() {
+            const result = document.getElementById('realtimeResult');
+            if (realtimeUnsubscribe) {
+                realtimeUnsubscribe();
+                realtimeUnsubscribe = null;
+                result.innerHTML = '<div class="status info">Real-time listener stopped.</div>';
+            } else {
+                result.innerHTML = '<div class="status info">No active listener to stop.</div>';
+            }
+        };
+        
+        // Test reports
+        window.testReports = async function() {
+            const result = document.getElementById('reportsResult');
+            try {
+                result.innerHTML = '<div class="status info">Generating reports...</div>';
+                
+                const reports = await firebaseDataManager.loadReports();
+                
+                result.innerHTML = `
+                    <div class="status success">
+                        ✅ Reports generated successfully!<br>
+                        <small>
+                            Total Orders: ${reports.totalOrders}<br>
+                            Total Revenue: $${reports.totalRevenue.toFixed(2)}<br>
+                            Pending: ${reports.pendingOrders} | Approved: ${reports.approvedOrders}<br>
+                            Average Order Value: $${reports.averageOrderValue.toFixed(2)}
+                        </small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="status error">❌ Failed to generate reports: ${error.message}</div>`;
+            }
+        };
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeFirebase);
+    </script>
+</body>
+</html>

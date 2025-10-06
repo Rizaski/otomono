@@ -1,0 +1,31 @@
+{
+  "name": "jersey-orders-management",
+  "version": "1.0.0",
+  "description": "Jersey Orders Management System with Firebase Integration",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx http-server -p 3000 -c-1",
+    "dev": "npx http-server -p 3000 -c-1 --cors",
+    "build": "echo 'No build process needed for static files'",
+    "deploy": "firebase deploy"
+  },
+  "keywords": [
+    "jersey",
+    "orders",
+    "management",
+    "firebase",
+    "firestore"
+  ],
+  "author": "Jersey Orders Team",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

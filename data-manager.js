@@ -5,6 +5,25 @@ class DataManager {
         this.customers = this.loadCustomers();
         this.settings = this.loadSettings();
         this.reports = this.loadReports();
+        this.useFirebase = false;
+        this.firebaseManager = null;
+    }
+
+    // Initialize Firebase if available
+    async initializeFirebase() {
+        try {
+            // Try to import Firebase modules
+            const { firebaseDataManager } = await import('./firebase-data-manager.js');
+            this.firebaseManager = firebaseDataManager;
+            await this.firebaseManager.initialize();
+            this.useFirebase = true;
+            console.log('Firebase Data Manager initialized');
+            return true;
+        } catch (error) {
+            console.log('Firebase not available, using localStorage:', error.message);
+            this.useFirebase = false;
+            return false;
+        }
     }
 
     // Orders Management
@@ -22,36 +41,48 @@ class DataManager {
         localStorage.setItem('jersey_orders', JSON.stringify(this.orders));
     }
 
-    addOrder(order) {
-        const newOrder = {
-            id: `ORD-${String(this.orders.length + 1).padStart(3, '0')}`,
-            ...order,
-            orderDate: new Date().toISOString().split('T')[0],
-            status: 'pending'
-        };
-        this.orders.unshift(newOrder);
-        this.saveOrders();
-        return newOrder;
+    async addOrder(order) {
+        if (this.useFirebase && this.firebaseManager) {
+            return await this.firebaseManager.addOrder(order);
+        } else {
+            const newOrder = {
+                id: `ORD-${String(this.orders.length + 1).padStart(3, '0')}`,
+                ...order,
+                orderDate: new Date().toISOString().split('T')[0],
+                status: 'pending'
+            };
+            this.orders.unshift(newOrder);
+            this.saveOrders();
+            return newOrder;
+        }
     }
 
-    updateOrder(id, updates) {
-        const index = this.orders.findIndex(order => order.id === id);
-        if (index !== -1) {
-            this.orders[index] = { ...this.orders[index], ...updates };
-            this.saveOrders();
-            return this.orders[index];
+    async updateOrder(id, updates) {
+        if (this.useFirebase && this.firebaseManager) {
+            return await this.firebaseManager.updateOrder(id, updates);
+        } else {
+            const index = this.orders.findIndex(order => order.id === id);
+            if (index !== -1) {
+                this.orders[index] = { ...this.orders[index], ...updates };
+                this.saveOrders();
+                return this.orders[index];
+            }
+            return null;
         }
-        return null;
     }
 
-    deleteOrder(id) {
-        const index = this.orders.findIndex(order => order.id === id);
-        if (index !== -1) {
-            this.orders.splice(index, 1);
-            this.saveOrders();
-            return true;
+    async deleteOrder(id) {
+        if (this.useFirebase && this.firebaseManager) {
+            return await this.firebaseManager.deleteOrder(id);
+        } else {
+            const index = this.orders.findIndex(order => order.id === id);
+            if (index !== -1) {
+                this.orders.splice(index, 1);
+                this.saveOrders();
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     getOrders(filters = {}) {
