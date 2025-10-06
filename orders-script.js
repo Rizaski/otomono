@@ -201,7 +201,18 @@ function showOrderDetails(orderId) {
             ${order.uniqueLink ? `
                 <div class="unique-link">
                     <h4>Customer Details Link</h4>
-                    <a href="${order.uniqueLink}" target="_blank">${order.uniqueLink}</a>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <a href="${order.uniqueLink}" target="_blank">${order.uniqueLink}</a>
+                        <button class="btn btn-xs btn-secondary" onclick="copyToClipboard('${order.uniqueLink}', this)">Copy</button>
+                    </div>
+                    ${order.shortLink ? `
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;">
+                        <a href="${order.shortLink}" target="_blank">${order.shortLink}</a>
+                        <button class="btn btn-xs btn-secondary" onclick="copyToClipboard('${order.shortLink}', this)">Copy</button>
+                    </div>
+                    ` : `
+                    <div style="color:#888; font-size:0.85rem; margin-top:6px;">Generating short link...</div>
+                    `}
                     <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
                         Share this link with the customer to collect jersey details.
                     </p>
@@ -397,10 +408,70 @@ function generateCustomerLink(orderId) {
     
     const uniqueLink = generateUniqueLink(orderId);
     order.uniqueLink = uniqueLink;
+    // Try to generate a short URL; non-blocking for UX
+    generateShortLink(uniqueLink).then(shortUrl => {
+        if (shortUrl) {
+            order.shortLink = shortUrl;
+            saveOrders();
+            // Re-render details section if open
+            showOrderDetails(orderId);
+        }
+    }).catch(() => {});
     
     saveOrders();
     showOrderDetails(orderId);
     showAlert('Customer link generated successfully!', 'success');
+}
+
+async function generateShortLink(longUrl) {
+    // Primary: shrtco.de
+    try {
+        const res = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(longUrl)}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.ok && data.result && data.result.full_short_link) {
+                return data.result.full_short_link;
+            }
+        }
+    } catch (e) {}
+    // Fallback: is.gd
+    try {
+        const res2 = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`);
+        if (res2.ok) {
+            const txt = await res2.text();
+            if (txt && txt.startsWith('http')) return txt.trim();
+        }
+    } catch (e) {}
+    // Fallback: tinyurl simple API (may be blocked by CORS on some environments)
+    try {
+        const res3 = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+        if (res3.ok) {
+            const txt = await res3.text();
+            if (txt && txt.startsWith('http')) return txt.trim();
+        }
+    } catch (e) {}
+    return null;
+}
+
+function copyToClipboard(text, btn) {
+    const write = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            if (btn) {
+                const old = btn.innerHTML;
+                btn.innerHTML = 'Copied!';
+                setTimeout(() => { btn.innerHTML = old; }, 1500);
+            }
+        } catch (e) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (err) {}
+            document.body.removeChild(ta);
+        }
+    };
+    write();
 }
 
 function approveOrder(orderId) {
