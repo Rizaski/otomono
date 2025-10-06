@@ -106,8 +106,30 @@ function generateUniqueLink(orderId) {
     if (!baseUrl.endsWith('/') && !baseUrl.endsWith('.html')) {
         baseUrl += '/';
     }
-    
-    const customerLink = `${baseUrl}customer.html?order=${orderId}&action=details`;
+    // Optionally embed minimal order payload as base64 for environments without storage/DB
+    const order = orders.find(o => o.id === orderId);
+    let payloadParam = '';
+    if (order) {
+        try {
+            const minimalOrder = {
+                id: order.id,
+                customerName: order.customerName,
+                customerEmail: order.customerEmail,
+                customerPhone: order.customerPhone,
+                jerseyQuantity: order.jerseyQuantity,
+                status: order.status,
+                specialInstructions: order.specialInstructions || '',
+                createdDate: order.createdDate
+            };
+            const json = JSON.stringify(minimalOrder);
+            const base64 = btoa(unescape(encodeURIComponent(json)));
+            payloadParam = `&payload=${base64}`;
+        } catch (e) {
+            console.warn('Failed to encode payload for customer link', e);
+        }
+    }
+
+    const customerLink = `${baseUrl}customer.html?order=${orderId}&action=details${payloadParam}`;
     
     // Debug logging
     console.log('Generating customer link:');

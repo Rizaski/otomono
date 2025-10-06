@@ -43,6 +43,7 @@ function hidePageLoading() {
 function loadOrderFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order');
+    const payload = urlParams.get('payload');
     
     // Debug logging
     console.log('Current URL:', window.location.href);
@@ -67,6 +68,22 @@ function loadOrderFromUrl() {
         showDemoNotice();
     } else {
         console.log('Order ID found, fetching order data:', orderId);
+        // If payload exists, attempt to decode and use it as immediate order data
+        if (payload) {
+            try {
+                const json = decodeURIComponent(escape(atob(payload)));
+                const parsed = JSON.parse(json);
+                if (parsed && parsed.id === orderId) {
+                    console.log('Using embedded payload for order');
+                    currentOrder = parsed;
+                    displayOrderInfo();
+                    displayDetailsForm();
+                    return;
+                }
+            } catch (e) {
+                console.warn('Failed to decode payload from URL', e);
+            }
+        }
         // Simulate API call to fetch order data
         fetchOrderData(orderId);
     }
@@ -83,8 +100,10 @@ async function fetchOrderData(orderId) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Try localStorage first (for development)
-        const localOrders = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+        // Try localStorage first (for development) - check both possible keys
+        const lsA = JSON.parse(localStorage.getItem('jerseyOrders') || '[]');
+        const lsB = JSON.parse(localStorage.getItem('jersey_orders') || '[]');
+        const localOrders = [...lsA, ...lsB];
         console.log('Local orders found:', localOrders.length);
         let order = localOrders.find(o => o.id === orderId);
         
