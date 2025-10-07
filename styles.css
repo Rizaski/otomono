@@ -303,8 +303,12 @@ body {
   .dashboard-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .search { width: 100%; }
+  .admin-header { padding: var(--space-2) var(--space-4); }
+  .header-content { gap: var(--space-2); }
+  .logo-image { height: 24px; }
+  .search { width: 100%; padding: 6px 10px; }
   .topbar { width: 100%; }
+  .dashboard-grid { grid-template-columns: 1fr; }
   .mobile-nav { display: flex; }
   .app-body { padding-bottom: 64px; }
 }
@@ -786,6 +790,14 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
 }
+
+/* Settings page compact typography */
+.admin-main .orders-section.settings-compact .section-header h2 { font-size: 1.1rem; }
+.admin-main .orders-section.settings-compact .filter-card { padding: var(--space-4); }
+.admin-main .orders-section.settings-compact label { font-size: 0.9rem; }
+.admin-main .orders-section.settings-compact input,
+.admin-main .orders-section.settings-compact select,
+.admin-main .orders-section.settings-compact textarea { font-size: 0.95rem; }
 
 .filter-row {
     display: grid;
